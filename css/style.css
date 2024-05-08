@@ -1,0 +1,57 @@
+body {
+	font-family: Verdana;	
+	color: #666666;
+	margin: auto;
+	margin-top: 50px;	
+	text-align: center;
+}
+
+.msg_div {
+	width: 95%;
+	padding: 3;
+	font-size: 12px;
+	background-color: FF0000;
+	color: #FFFFFF;
+}
+
+td {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+.textbox {
+	font-size: 18px;
+	width: 250px;
+	border:1px #C0C0C0 solid;
+}
+
+.textarea {
+	font: 12px arial;
+	width: 700;
+	height: 50;
+}
+
+.buttons {
+	font: 12px Verdana;
+	border:1px #C0C0C0 solid;
+}
+
+.select {
+	font-size: 12px;
+	width: 250;
+}
+
+.copyright{
+	font:11px verdana;
+	color:#454c4f;
+}
+
+label {
+	text-align:left;
+	width:250px;
+}
+
+.fullwidth
+{
+	width:100%;	
+}

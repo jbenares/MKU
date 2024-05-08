@@ -1,0 +1,20 @@
+GCHART DEFAULT			Gchart_id
+
+ISSUANCE:
+Direct Materials		4
+Materials Inventory		3
+
+Receiving (MRR)
+Materials Inventory		3
+Accounts Payable		2
+
+CV:
+Manual: OK
+
+Process
+
+PR -> PO -> MRR -> CV
+
+		-> ISsuance
+
+Petty Cash -> DV -> CV

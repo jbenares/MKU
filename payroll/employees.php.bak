@@ -1,0 +1,131 @@
+<?php
+require_once(dirname(__FILE__).'/../library/lib.php');
+
+	$b = $_REQUEST['b'];
+	$checkList = $_REQUEST['checkList'];
+	$client_keyword = $_REQUEST['client_keyword'];
+	$projects = $_REQUEST['projects'];
+
+	if($b=='Delete Selected') {
+	  if(!empty($checkList)) {
+		foreach($checkList as $ch) {
+			mysql_query("update employee set employee_void='1' where employeeID='$ch'");
+		}
+	  }
+	}
+?>
+<script language="JavaScript" src="scripts/cwcalendar/calendar.js"></script>
+<link rel="stylesheet" href="scripts/cwcalendar/cwcalendar.css"></link>
+<form name="_form" action="" method="post">
+<div class=form_layout>
+	<div class="module_title"><img src='images/user_orange.png'><?=$transac->getMname($view);?></div>
+    <div class="module_actions">
+    	<input type="text" name="client_keyword" class="textbox" value="<?=$client_keyword;?>" />
+        <?php
+
+        // echo $options->payrollcenter_options($payrollcenter);
+        ?>
+        <input type="submit" name="b" value="Search Employee" class="buttons" />
+        <input type="button" name="b" value="Add Employee" onclick="xajax_new_employeesform();toggleBox('demodiv',1);" class="buttons" />
+        <input type="submit" name="b" value="Delete Selected" onclick="return approve_confirm();" class="buttons" />
+    </div>
+    <?php
+		if(!empty($msg)) echo '<div class="msg_div">'.$msg.'</div>';
+	?>
+    <div style="padding:3px; text-align:center;">
+    <table cellspacing="2" cellpadding="5" width="100%" align="center" class="search_table">
+    	<?php
+			$page = $_REQUEST['page'];
+			if(empty($page)) $page = 1;
+
+			$limitvalue = $page * $limit - ($limit);
+
+			$sql = "select
+						  *
+					 from
+					 	  employee as e
+					 	  left join  employee_status as es
+					 	  on e.employee_statusID = es.employee_statusID
+					 where
+					 	  (
+						 	  e.employee_lname like '%$client_keyword%'  or
+							  e.employeeID like '%$client_keyword%'
+						  )
+					 	  and e.employee_void='0'
+					order by
+						  employee_lname asc, employee_fname asc
+				";
+
+			$pager = new PS_Pagination($conn,$sql,$limit,$link_limit);
+
+			$i=$limitvalue;
+			$rs = $pager->paginate();
+		?>
+        <tr>
+            <td colspan="5" align="left">
+                <?php
+                    echo $pager->renderFullNav("$view&b=$b&key=$key");
+                ?>
+            </td>
+        </tr>
+    	<tr bgcolor="#C0C0C0">
+          <td width="20"><b>#</b></td>
+          <td width="20" align="center"><input type="checkbox"  name="checkAll" value="Comfortable with" onclick="javascript:check_all('_form', this)" title="Check/Uncheck All" /></td>
+          <td width="20"></td>
+		  <td width="20"></td>
+          <td width="100"><b>Employee ID</b></td>
+          <td width="250"><b>Employee Name</b></td>
+          <td width="50"><b>Gender</b></td>
+          <td width="250"><b>Projects</b></td>
+          <td width="100"><b>TIN</b></td>
+          <td width="100"><b>SSS No.</b></td>
+          <td width="100"><b>PhilHealth No.</b></td>
+          <td width="100"><b>HDMF No.</b></td>
+          <td width="100"><b>Date Hired</b></td>
+          <td width="50"><b>Status</b></td>
+        </tr>
+		<?php
+			while($r=mysql_fetch_assoc($rs)) {
+	//			$getEmpStat = mysql_query("select * from employee_status where empStatID='$r[empStatID]'");
+	//			$res = mysql_fetch_array($getEmpStat);
+
+	//			$getPayCenter = mysql_query("select * from payroll_center where payrollcenterID='$r[payrollcenterID]'");
+	//			$rPC = mysql_fetch_array($getPayCenter);
+
+				$getProject = mysql_query("select * from employee_contracts as e,projects as p where e.employeeID='$r[employeeID]' and e.projectsID = p.project_id order by e.contract_id desc");
+				$rP = mysql_fetch_array($getProject);
+				$employeeName = $r[employee_lname].', '.$r[employee_fname].' '.$r[employee_mname];
+				echo '<tr bgcolor="'.$transac->row_color($i++).'">';
+
+				echo '<td width="20">'.$i.'.</td>';
+				echo '<td><input type="checkbox" name="checkList[]" value="'.$r[employeeID].'" onclick="document._form.checkAll.checked=false"></td>';
+				echo '<td width="15"><a style="cursor:pointer;" onclick="xajax_edit_employeesform(\''.$r[employeeID].'\');" title="Edit Entry"><img src="images/edit.gif" border="0"></a></td>';
+				if($_SESSION['access_id']==16 || $_SESSION['access_id']==1 || $_SESSION['access_id']==2){
+					echo '<td width="15"><a style="cursor:pointer;" onclick="xajax_new_contract(\''.$r[employeeID].'\',\''.$employeeName.'\');" title="New Contract"><img src="images/book.png" border="0"></a></td>';
+				}else{
+					echo '<td width="15">&nbsp;</td>';
+				}
+				echo '<td>'.str_pad($r['employeeID'],7,0,STR_PAD_LEFT).'</td>';
+				echo '<td>'.$r[employee_lname].', '.$r[employee_fname].' '.$r[employee_mname].'.</td>';
+				echo '<td>'.$r[sex].'</td>';
+				echo '<td>'.$rP[project_name].'</td>';
+				echo '<td>'.$r[tin].'</td>';
+				echo '<td>'.$r[sss].'</td>';
+				echo '<td>'.$r[philhealth].'</td>';
+				echo '<td>'.$r[hdmf].'</td>';
+				echo '<td>'.$r[datehired].'</td>';
+				echo '<td>'.$r[employee_status].'</td>';
+				echo '</tr>';
+			}
+        ?>
+        <tr>
+            <td colspan="5" align="left">
+                <?php
+                    echo $pager->renderFullNav("$view&b=$b&key=$key");
+                ?>
+            </td>
+      	</tr>
+    </table>
+    </div>
+</div>
+</form>

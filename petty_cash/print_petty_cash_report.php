@@ -1,0 +1,134 @@
+<?php
+	ob_start();
+	session_start();
+
+	include_once("../conf/ucs.conf.php");
+	include_once("../library/lib.php");
+
+	$from_date		= $_REQUEST['from_date'];
+	$to_date		= $_REQUEST['to_date'];
+	
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>PETTY CASH</title>
+<script>
+function printPage() { print(); } //Must be present for Iframe printing
+</script>
+<style type="text/css">
+
+body
+{
+	size: legal portrait;
+	padding:0px;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:11px;
+}
+
+.clearfix:after {
+	content: ".";
+	display: block;
+	clear: both;	
+	visibility: hidden;
+	line-height: 0;
+	height: 0;
+}
+
+.clearfix {
+	display: inline-block;
+}
+
+html[xmlns] .clearfix {
+	display: block;
+}
+ 
+* html .clearfix {
+	height: 1%;
+}
+
+table{ border-collapse:collapse; width:100%; }
+table td{ padding:3px; }
+table thead td{ font-weight:bold;  border-top:1px solid #000; border-bottom:1px solid #000; }
+table tfoot td{
+	border-top:1px solid #000;
+	font-weight:bold;	
+}
+@media print{
+	table { page-break-inside:auto }
+	tr{ page-break-inside:avoid; page-break-after:auto }
+	thead { display:table-header-group }
+	tfoot { display:table-footer-group }
+	.pb { page-break-after:always }
+}
+
+</style>
+
+</head>
+<body>
+	<table>
+    	<thead>
+        	<tr>
+            	<td colspan="7">
+                	<div>
+                    	<?=$title?><br />
+                        PETTY CASH REPORT<br />
+                        <?=lib::ymd2mdy($from_date)?> to <?=lib::ymd2mdy($to_date)?> <br /><br />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+				<td><b>#</b></td>
+				<td><b>Date</b></td>
+				<td><b>PC No.</b></td>
+				<td><b>Requested By</b></td>
+				<td><b>Department</b></td>
+				<td><b>Amount</b></td>          	
+				<td><b>Status</b></td>
+            </tr>
+        </thead>
+        <tbody>
+	<?php
+		$sql = mysql_query("select
+						*
+					from
+						petty_cash p, projects s, employee e
+					where
+						p.employeeID = e.employeeID AND p.department_id = s.project_id AND p.is_deleted != '1' and
+						p.date_requested between '$from_date' and '$to_date'
+					order by
+						p.petty_cash_id DESC");
+
+		$i=1;
+		while($r=mysql_fetch_array($sql)) {
+			$tamount += $r[amount];
+			$dt_da = date("M d, Y",strtotime($r['date_requested']));
+			if($r['is_approve'] == '0'){$status = '<font color=black>Pending</font>'; }else{$status = '<font color=black>Approved</font>';}
+			echo '<tr>';
+			echo '<td>'.$i.'.</td>';
+			echo '<td>'.$dt_da.'</td>';	
+            echo '<td>'.str_pad($r[petty_cash_id],6,0,STR_PAD_LEFT).'</td>';				
+			echo '<td>'.$r['employee_lname'] . ',&nbsp;' . $r['employee_fname'].'</td>';
+			echo '<td>'.$r[project_name].'</td>';
+			echo '<td>'.number_format($r[amount],2).'</td>';
+			echo '<td>'.$status.'</td>';
+			echo '</tr>';
+		
+			$i++;
+		}
+			
+	?>
+			<tr style="border-top:1px solid #000">
+			<td style="text-align:left;font-size:16px;font-weight:bold">TOTAL</td>
+			<td>&nbsp </td>
+			<td>&nbsp </td>
+			<td>&nbsp </td>
+			<td>&nbsp </td>
+			<td style="font-size:12px;font-weight:bolder"><?= number_format($tamount,2);?></td>
+			<td></td>
+			</tr>
+        </tbody>
+    </table>
+</body>
+</html>

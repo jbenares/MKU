@@ -1,0 +1,16 @@
+Driver={MySQL ODBC 5.1 Driver};Server=localhost;Database=sms; User=root;Password=;Option=3;
+
+select id,receiver,msg,operator,sender,reference from ozekismsout where status='send'
+
+update ozekismsout set status='sent' where id='$id'
+
+update ozekismsout set status='transmitted',senttime='$senttime' where id='$id'
+
+update ozekismsout set status='deleted' where id='$id'
+
+update ozekismseout set status='received',receivedtime='$recvtime' where id='$id'
+
+insert into ozekismsin (operator,sender,receiver,msg,
+senttime,receivedtime) values 
+('$operator','$sender','$receiver','$msg','$senttime',
+'$receivedtime')

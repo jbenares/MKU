@@ -1,0 +1,246 @@
+<?php
+
+	function new_chartofaccountsform() {
+		$objResponse = new xajaxResponse();
+		$options = new options();
+		
+		$parent_select = $options->getTableAssoc($r['parent_gchart_id'],'parent_gchart_id','Select Parent Account',"select * from gchart order by gchart",'gchart_id','gchart');
+		
+		$newContent = "<br><img src='images/user_orange.png'> NEW CHART OF ACCOUNTS<p>
+						<table class=form_table>	
+						  <tr>
+						  	<td>Account Code: </td>
+						  	<td><input type='text' name='acode' class='textbox3'></td>
+						  </tr>
+						  <tr>
+						  	<td>Parent Account: </td>
+						  	<td>
+								<input type='text' class='textbox gchart-ac' name='parent_gchart'>
+								<input type='hidden' name='parent_gchart_id' value=''>								
+							</td>
+						  </tr>
+						  <tr>
+						  	<td>Desciption: </td>
+						  	<td><input type='text' name='gchart' class='textbox2'></td>
+						  </tr>
+						  <tr>
+						  	<td>Classification: </td>
+						  	<td>".$options->getClassificationOptions()."</td>
+						  </tr>
+						  <tr>
+						  	<td>Sub Classification: </td>
+						  	<td>".$options->getTableAssoc('','sub_mclass','Select Sub Classification',"select * from sub_gchart where sub_gchart_void = '0' order by sub_gchart asc",'sub_gchart_id','sub_gchart')."</td>
+						  </tr>
+						  <tr>
+						  	<td>Beginning Balance:</td>
+							<td><input type='text' class='textbox3' name='beg_bal' ></td>
+						  </tr>
+						  <tr>
+						  	<td>Enable: </td>
+						  	<td><input type='checkbox' name='enable' checked='checked' value='Yes'></td>
+						  </tr>
+						  <tr>
+						  	<td></td>
+						  	<td>						  	  
+						  	  <input type=button name=b value='Submit' class=buttons onclick=xajax_new_chartofaccounts(xajax.getFormValues('dialog_form'));>
+						  	  <input type=reset value='Clear Form' class=buttons>
+						  	</td>
+						  </tr>
+						</table>
+				";	
+		$newContent .= "
+			<script type='text/javascript'>
+				jQuery('.gchart-ac').autocomplete({
+					source: 'autocomplete/gchart.php',
+					minLength: 1,
+					select: function(event, ui) {
+						jQuery(this).val(ui.item.value);
+						jQuery(this).next().val(ui.item.id);
+					}
+				});
+			</script>
+		";						   
+		
+		$objResponse->assign('dialog_content','innerHTML',$newContent);
+		$objResponse->script("jQuery('#dialog').dialog('open');");
+		$objResponse->script("toggleBox('demodiv',0)");
+		
+		return $objResponse;
+	}
+	
+	function new_chartofaccounts($form_data) {
+		$objResponse = new xajaxResponse();
+		
+		if(	
+			!empty($form_data[acode]) &&
+			!empty($form_data[gchart]) &&
+			!empty($form_data[mclass])
+		)
+		{
+			$enable=($form_data[enable]=="Yes")?"Y":"N";
+		
+				
+			$sql = "insert into 
+						gchart 
+					set
+						acode='$form_data[acode]',
+						scode='$form_data[scode]',
+						gchart='$form_data[gchart]',
+						mclass='$form_data[mclass]',
+						sub_mclass='$form_data[sub_mclass]',
+						enable='$enable',
+						parent_gchart_id = '$form_data[parent_gchart_id]',
+						beg_bal = '$form_data[beg_bal]'
+					";
+			
+			$query = mysql_query($sql);		
+			
+			if(!mysql_error()) {
+				$objResponse->alert("Query Successful!");
+				$objResponse->script("window.location.reload();");
+			}					
+			else
+				$objResponse->alert(mysql_error());
+		}
+		else {
+			$objResponse->alert("Fill in all fields!");
+		}
+		
+		$objResponse->script("toggleBox('demodiv',0)");
+		return $objResponse;  			   
+	}
+	
+	function edit_chartofaccountsform($id) {
+		$objResponse = new xajaxResponse();
+		$options = new options();
+		
+		//$objResponse->alert($id);
+		
+		$sql = mysql_query("select
+								*
+							from
+								gchart
+							where
+								gchart_id='$id'");
+						  
+		$r = mysql_fetch_assoc($sql);
+		
+		$enable=($r['enable']=="Y")?"checked='checked'":'';
+		
+		//$parent_select = $options->getTableAssoc($r['parent_gchart_id'],'parent_gchart_id','Select Parent Account',"select * from gchart order by gchart",'gchart_id','gchart');
+		
+		$newContent = "<br><img src='images/user_orange.png'> EDIT CHART OF ACCOUNTS<p>	
+						<input type='hidden' name='gchart_id' value='$r[gchart_id]'>
+						<table class=form_table>	
+						  <tr>
+						  	<td>Account Code: </td>
+						  	<td><input type='text' name='acode' class='textbox3' value='$r[acode]' autcomplete='off' ></td>
+						  </tr>
+						  <tr>
+						  	<td>Parent Account: </td>
+						  	<td>
+								<input type='text' id='gchart_ac' class='textbox gchart-ac' name='parent_gchart' value='".$options->getAttribute('gchart','gchart_id',$r['parent_gchart_id'],'gchart')."' onclick='this.select();' >
+								<input type='hidden' name='parent_gchart_id' value='$r[parent_gchart_id]'>								
+							</td>
+						  </tr>
+						  <tr>
+						  	<td>Desciption: </td>
+						  	<td><input type='text' name='gchart' class='textbox2' value='$r[gchart]'></td>
+						  </tr>
+						  <tr>
+						  	<td>Classification: </td>
+						  	<td>".$options->getClassificationOptions($r[mclass])."</td>
+						  </tr>
+						  <tr>
+						  	<td>Sub Classification: </td>
+						  	<td>".$options->getTableAssoc($r['sub_mclass'],'sub_mclass','Select Sub Classification',"select * from sub_gchart where sub_gchart_void = '0' order by sub_gchart asc",'sub_gchart_id','sub_gchart')."</td>
+						  </tr>
+						  <tr>
+						  	<td>Beginning Balance:</td>
+							<td><input type='text' class='textbox3' name='beg_bal' value='$r[beg_bal]' ></td>
+						  </tr>
+						  <tr>
+						  	<td>Enable: </td>
+						  	<td><input type='checkbox' name='enable' $enable value='Yes'></td>
+						  </tr>
+						  <tr>
+						  	<td></td>
+						  	<td>						  	  
+						  	  <input type=button name=b value='Submit' class=buttons onclick=xajax_edit_chartofaccounts(xajax.getFormValues('dialog_form'));>
+						  	  <input type=reset value='Clear Form' class=buttons>
+						  	</td>
+						  </tr>
+						</table>
+					   </form>
+		";	
+		$newContent .= "
+			<script type='text/javascript'>
+				jQuery('.gchart-ac').autocomplete({
+					source: 'autocomplete/gchart.php',
+					minLength: 1,
+					select: function(event, ui) {
+						jQuery(this).val(ui.item.value);
+						jQuery(this).next().val(ui.item.id);
+					}
+				});
+			</script>
+		";		
+		
+		$objResponse->assign('dialog_content','innerHTML',$newContent);
+		$objResponse->script("jQuery('#dialog').dialog('open');");
+		$objResponse->script("toggleBox('demodiv',0)");	
+				
+		return $objResponse;}
+	
+	function edit_chartofaccounts($form_data) {
+		$objResponse = new xajaxResponse();
+		
+	 	if(	
+			!empty($form_data[acode]) &&
+			!empty($form_data[gchart]) &&
+			!empty($form_data[mclass])
+		)
+		{
+		
+			$enable=($form_data[enable]=="Yes")?"Y":"N";
+			$parent=0;
+			
+			if(!empty($form_data[parent_gchart])) 
+			{
+				$parent = $form_data[parent_gchart_id];
+			}
+
+			$sql = "update
+						gchart 
+					set
+						acode='$form_data[acode]',
+						scode='$form_data[scode]',
+						gchart='$form_data[gchart]',
+						mclass='$form_data[mclass]',
+						sub_mclass='$form_data[sub_mclass]',
+						enable='$enable',
+						parent_gchart_id = '$parent',
+						beg_bal = '$form_data[beg_bal]'
+					where
+						gchart_id='$form_data[gchart_id]'
+				";
+			
+			$query = mysql_query($sql);		
+			
+			
+			if(!mysql_error()) {
+				$objResponse->alert("Query Successful!");
+				$objResponse->script("window.location.reload();");
+			}					
+			else
+				$objResponse->alert(mysql_error());
+		}
+		else {
+			$objResponse->alert("Fill in all fields!");
+		}
+		
+		$objResponse->script("toggleBox('demodiv',0)");
+		return $objResponse;  			   
+	}
+	
+?>

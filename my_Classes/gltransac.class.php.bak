@@ -1,0 +1,388 @@
+<?php
+	function printGLTransac($id){
+		
+		$objResponse=new xajaxResponse();
+		$options=new options();	
+		
+		//$objResponse->alert($id);
+		
+		$newContent="
+			<iframe id='JOframe' name='JOframe' frameborder='0' src='printGeneralLedger.php?id=$id' width='100%' height='500'>
+        	</iframe>
+		";
+		$objResponse->script("hideBox();");
+		$objResponse->assign("content","innerHTML", $newContent);
+		$objResponse->assign("gltran_header_id","value",$id);
+		$objResponse->script("toggleBox('demodiv',0)");
+		return $objResponse;
+	}
+	
+	function updateGLTransacStatus($id){
+		$objResponse=new xajaxResponse();
+		$options=new options();
+
+		$query="
+			select
+				*
+			from 
+				gltran_header
+			where
+				gltran_header_id='$id'
+		";
+		$result=mysql_query($query);
+		$r=mysql_fetch_assoc($result);
+		
+		$status=$r[status];
+		$audit=$options->getAuditFromGLTransac($id);
+		
+		$datetoday=date("Y-m-d H:i:s");
+		$audit.="Printed by: ".$options->getUserName($_SESSION[userID])."on $datetoday, ";
+		
+		if($status!='C'):
+			$query="
+				update
+					gltran_header
+				set
+					status='P',
+					audit='$audit'
+				where
+					gltran_header_id='$id'
+			";
+			mysql_query($query);
+		endif;
+		
+		return $objResponse;
+	}
+	function refreshGLTable($gltran_header_id){
+		$objResponse=new xajaxResponse();
+		$options=new options();
+		
+		$content=$options->getUpdatedGLTransacTable($gltran_header_id);
+		$objResponse->assign('table_container','innerHTML',$content);
+		
+		$objResponse->script("toggleBox('demodiv',0)");
+		return $objResponse;
+	}
+	
+	function addTransaction($form_data){
+		$objResponse=new xajaxResponse();
+		$options=new options();
+		
+		/*if($form_data[enable]){
+			$enable='Y';	
+		}else{
+			$enable='N';
+		}*/
+		$enable="Y";
+		
+		$query="
+			insert into
+				gltran_detail
+			set
+				gchart_id='$form_data[gchart_id]',
+				description='$form_data[description]',
+				debit='$form_data[debit]',
+				credit='$form_data[credit]',
+				enable='$enable',
+				gltran_header_id='$form_data[gltran_header_id]'
+		";
+		mysql_query($query) or die(mysql_error());
+		
+		$objResponse->script("xajax_refreshGLTable('$form_data[gltran_header_id]');");
+		return $objResponse;
+	}
+	
+	function removeParent($gltran_header_id,$gltran_detail_id){
+		$objResponse=new xajaxResponse();
+		$options=new options();
+		$objResponse->script("toggleBox('demodiv',1)");
+		$query="
+			delete from
+				gltran_detail
+			where
+				gltran_detail_id='$gltran_detail_id'
+		";	
+		mysql_query($query) or die(mysql_error());
+		
+		$objResponse->script("xajax_refreshGLTable('$gltran_header_id');");
+		return $objResponse;
+	}	
+	
+	function importTransactions($form_data){
+		
+		$objResponse=new xajaxResponse();
+		$options=new options();
+		$objResponse->script("toggleBox('demodiv',1)");
+		
+		$gltran_header_id=$form_data[gltran_header_id];
+		$journal_code=$options->getJournalCode($form_data[journal_id]);
+		$fromdate=$form_data[fromdate];
+		$todate=$form_data[todate];
+		
+		if($journal_code=="AP"){
+			/*
+				SOURCE: FINISHED RECEIVING REPORT
+				DEBIT : INVENTORY BASED ON CATEGORY - 
+				CREDIT : ACCOUNTS PAYABLE - acode 3000
+			*/
+			$query="
+				select 
+					stock_id,
+					amount,
+					h.rr_header_id
+				from
+					rr_header as h,rr_detail as d
+				where
+					h.rr_header_id=d.rr_header_id
+				and
+					date between '$fromdate' and '$todate'
+				and
+					status='F'
+				and
+					h.rr_header_id not in 
+				(
+					select
+						header_id as rr_header_id
+					from	
+						posted_headers
+					where
+						journal_code='AP'
+				)
+			";
+			$result=mysql_query($query);
+			$rm_acode=1600;
+			$rm_total=0;
+			$rr_header_ids=array();
+			while($r=mysql_fetch_assoc($result)){
+				if(!in_array($r[rr_header_id],$rr_header_ids)){
+					$rr_header_ids[]=$r[rr_header_id];
+				}
+				
+				$stock_id=$r[stock_id];				
+				$type=$options->getStockType($stock_id);
+				
+				if($type=="RM"){
+					$rm_total+=$r[amount];
+				}
+				/*
+				else{
+					$inventory_acode=$options->getInventoryACodeFromStockID($stock_id);
+
+					if($inventory_acode){
+						$options->insertIntoGLDetails($gltran_header_id,$inventory_acode,$r[amount],'');
+					}	
+					
+				}
+				*/				
+			}
+			if($rm_total)
+			{
+				$options->insertIntoGLDetails($gltran_header_id,$rm_acode,$rm_total,'');
+				$options->insertIntoGLDetails($gltran_header_id,3000,'',$rm_total);				
+				
+				/*ADD HEADER IN POSTED HEADERS*/
+				
+				if(!empty($rr_header_ids)){
+					foreach($rr_header_ids as $id){
+						mysql_query("
+							insert into
+								posted_headers
+							set
+								header_id='$id',
+								journal_code='AP'
+						") or die(mysql_error());
+					}
+				}
+			}
+			
+			
+		}
+		
+		/*
+			END OF AP
+		*/
+		
+		/*
+			START OF Disbursement Journal
+		*/
+		else if($journal_code=="DV"){
+			/*
+				SOURCE: RECEIVING REPORT
+				DEBIT : ACCOUNTS PAYABLE
+				CREDIT : CASH IN BANK
+			*/
+			$account_id=$form_data[account_id];
+			$account_id=explode("-",$account_id);
+			$account_id=$account_id[1];
+			
+			$query="
+				select 
+					grossamount	,
+					rr_header_id				
+				from
+					rr_header
+				where
+					date between '$fromdate' and '$todate'
+				and	
+					status!='C'
+				and	
+					account_id='$account_id'
+				and
+					rr_header_id not in 
+				(
+					select
+						header_id as rr_header_id
+					from	
+						posted_headers
+					where
+						journal_code='DV'
+				)
+			";
+			$result=mysql_query($query);
+			while($r=mysql_fetch_assoc($result)){
+				$options->insertIntoGLDetails($gltran_header_id,3000,$r[grossamount],'');
+				$options->insertIntoGLDetails($gltran_header_id,1200,'',$r[grossamount]);
+				
+				/*ADD HEADER IN POSTED HEADERS*/
+				mysql_query("
+					insert into
+						posted_headers
+					set
+						header_id='$r[rr_header_id]',
+						journal_code='DV'
+				") or die(mysql_error());
+				
+			}
+			
+			
+			
+		}
+		/*
+			END OF Disbursement Journal
+		*/
+		
+		/*
+			START OF Sales Journal
+		*/
+		
+		else if($journal_code=="SJ"){
+			/*
+				SOURCE: FINISHED DELIVERY REPORT
+				DEBIT : ACCOUNTS RECEIVABLES
+				CREDIT : INCOME BASED ON CATEGORY
+			*/
+			$query="
+				select 
+					stock_id,
+					amount,
+					h.dr_header_id
+				from
+					dr_header as h,dr_detail as d
+				where
+					h.dr_header_id=d.dr_header_id
+				and
+					date between '$fromdate' and '$todate'
+				and
+					status='F'
+				and
+					h.dr_header_id not in 
+				(
+					select
+						header_id as dr_header_id
+					from	
+						posted_headers
+					where
+						journal_code='SJ'
+				)
+			";
+			$result=mysql_query($query);
+			$dr_header_ids=array();
+			while($r=mysql_fetch_assoc($result)){
+				if(!in_array($r[dr_header_id],$dr_header_ids)){
+					$dr_header_ids[]=$r[dr_header_id];
+				}
+				
+				$income_acode=$options->getIncomeACodeFromStockID($r[stock_id]);
+				
+				if($income_acode){
+					$options->insertIntoGLDetails($gltran_header_id,$income_acode,'',$r[amount]);
+				}else{
+					$options->insertIntoGLDetails($gltran_header_id,1600,'',$r[amount]);
+				}
+			
+				$options->insertIntoGLDetails($gltran_header_id,1500,$r[amount],'');				
+			}
+			
+			if(!empty($dr_header_ids)){
+				foreach($dr_header_ids as $id){
+					mysql_query("
+						insert into
+							posted_headers
+						set
+							header_id='$id',
+							journal_code='SJ'
+					") or die(mysql_error());
+				}
+			}
+			
+		}
+		/*
+			END OF AP
+		*/
+		
+		/*
+			START OF Cash Receipts Journal
+		*/
+		else if($journal_code=="CR"){
+			/*
+				SOURCE: COLLECTION
+				DEBIT : CASH ON HAND
+				CREDIT : ACCOUNTS RECEIVABLES
+			*/
+			$query="
+				select 
+					checkamount,
+					h.pay_header_id
+				from
+					pay_header as h,pay_checks as c
+				where
+					h.pay_header_id=c.pay_header_id
+				and
+					date between '$fromdate' and '$todate'
+				and	
+					status!='C'
+				and
+					h.pay_header_id not in 
+				(
+					select
+						header_id as pay_header_id
+					from	
+						posted_headers
+					where
+						journal_code='CR'
+				)
+			";
+			$result=mysql_query($query);
+			while($r=mysql_fetch_assoc($result)){
+				$options->insertIntoGLDetails($gltran_header_id,1000,$r[checkamount],'');
+				$options->insertIntoGLDetails($gltran_header_id,1500,'',$r[checkamount]);
+				
+				mysql_query("
+						insert into
+							posted_headers
+						set
+							header_id='$r[pay_header_id]',
+							journal_code='CR'
+					") or die(mysql_error());
+			}
+		}
+		/*
+			END OF Cash Receipts Journal
+		*/
+		
+		
+		$objResponse->script("xajax_refreshGLTable('$gltran_header_id');");
+
+		return $objResponse;
+	}
+?>

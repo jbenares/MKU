@@ -1,0 +1,31 @@
+.demo2  {
+	color: #000000;
+	font-size: 11px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: #C0C0C0;
+	background: #FFFFFF;
+	font-style: Arial;
+    position: absolute;
+    padding: 5px;      
+    width: 230px;
+    z-index: 100;
+	left: 70%;
+    visibility: hidden;
+}
+
+.demo3  {
+	color: #000000;
+	font-size: 12px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: #666666;
+	background: #FFFFFF;
+	font-style: Arial;
+    position: absolute;
+    padding: 5px;      
+    width: 350px;
+    z-index: 100;
+	left: 25px;;
+    visibility: hidden;
+}
