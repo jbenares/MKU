@@ -799,6 +799,18 @@ function receive_stock_id_form($stock_id,$cost,$form_data){
 					<td>AMOUNT : </td>
 					<td><input type='text' class='textbox' id='amount' readonly='readonly'></td>
 				</tr>
+				<tr>
+					<td>INSTALLED BY : </td>
+					<td><input type='text' class='textbox' name='installed_by' id='installed_by'></td>
+				</tr>
+				<tr>
+					<td>DATE INSTALLED : </td>
+					<td><input type='text' class='datepicker textbox3' name='date_installed' title='Please enter date'  id='date_installed'></td>
+				</tr>
+				<tr>
+					<td>WITHDRAWAL # : </td>
+					<td><input type='text' class='textbox' name='withdrawal' id='withdrawal'></td>
+				</tr>
 			</table>
 		";
 		if($rr_type == "A" || 1): #DISPLAY ONLY IF ASSEET
@@ -911,6 +923,9 @@ function receive_stock_id_form($stock_id,$cost,$form_data){
 		$_unit			= $form_data['_unit'];
 		$account_id		= $form_data['account_id'];
 		$details		= $form_data['details'];
+		$installed_by	= $form_data['installed_by'];
+		$date_installed	= $form_data['date_installed'];
+		$withdrawal		= $form_data['withdrawal'];
 		
 		#DEPRECIATION DATA
 		$asset_code		= $form_data['asset_code'];
@@ -956,7 +971,10 @@ function receive_stock_id_form($stock_id,$cost,$form_data){
 					asset_code		= '$asset_code',
 					serial_no		= '$serial_no',
 					date_acquired	= '$date_acquired',
-					estimated_life	= '$estimated_life'
+					estimated_life	= '$estimated_life',
+					installed_by    = '$installed_by',
+					date_installed  = '$date_installed',
+					withdrawal	    = '$withdrawal'
 			") or $objResponse->alert(mysql_error());
 			
 			$rr_detail_id = mysql_insert_id();

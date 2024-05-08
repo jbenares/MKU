@@ -871,6 +871,9 @@ function printIframe(id)
                 <th width="100">U.Price</th>
                 <th width="100">Discount</th>
                 <th width="100">Amount</th>
+                <th width="100">Installed by</th>
+                <th width="100">Date Installed</th>
+                <th width="100">Withdrawal</th>
             </tr>
             <?php
             $result=mysql_query("
@@ -885,7 +888,10 @@ function printIframe(id)
                     amount,
 					account_id,
 					details,
-					d.discount
+					d.discount,
+					d.installed_by,
+					d.date_installed,
+					d.withdrawal
                 from
                     rr_detail as d, productmaster as p
                 where
@@ -905,7 +911,10 @@ function printIframe(id)
                 $rr_detail_id	= $r['rr_detail_id'];
                 $invoice		= $r['invoice'];
                 $amount			= $r['amount'];
-                $discount			= $r['discount'];
+                $discount		= $r['discount'];
+                $installed_by	= $r['installed_by'];
+                $date_installed	= $r['date_installed'];
+                 $withdrawal			= $r['withdrawal'];
 
                 $netamount += $amount;
 
@@ -929,6 +938,9 @@ function printIframe(id)
                 <td class="align-right"><input type="textbox" class="textbox3" style="text-align:right;" name="_cost[]" value="<?=$cost?>" autocomplete="off" /></td>
                 <td class="align-right"><?=number_format($discount*$quantity,2,'.',',')?></td>
                 <td class="align-right"><?=number_format($amount,2,'.',',')?></td>
+                <td class="align-right"><?=$installed_by?></td>
+                <td class="align-right"><?=$date_installed?></td>
+                <td class="align-right"><?=$withdrawal?></td>
                 <input type="hidden" name="_rr_detail_id[]" value="<?=$rr_detail_id?>" />
                 <input type="hidden" name="_quantity[]" value="<?=$quantity?>" />
                 <input type="hidden" name="_discount[]" value="<?=$discount?>" />

@@ -47,13 +47,12 @@ function printPage() { print(); } //Must be present for Iframe printing
                     <th>UNIT</th>
                     <th>PRICE</th>
                     <th>AMOUNT</th>
-                    <th>STATUS</th>
                 </tr>	
                 
              	<?php
 					$query="
 						select
-							h.date,d.quantity,d.amount,d.cost,h.po_header_id,account,stock,unit,h.work_category_id,h.sub_work_category_id, h.status
+							h.date,d.quantity,d.amount,d.cost,h.po_header_id,account,stock,unit,h.work_category_id,h.sub_work_category_id
 						from
 							po_header as h, po_detail as d, productmaster as p, supplier as s
 						where
@@ -62,7 +61,8 @@ function printPage() { print(); } //Must be present for Iframe printing
 							d.stock_id = p.stock_id
 						and
 							s.account_id = h.supplier_id
-						
+						and
+							h.status = 'C'
 						and
 							h.date between '$from_date' and '$to_date'
 						
@@ -74,12 +74,12 @@ function printPage() { print(); } //Must be present for Iframe printing
 							h.project_id = '$project_id'";
                     }
                     
-					if($approved){
-					$query.="
-						and
-							approval_status = 'A'
-					";	
-					}
+					// if($approved){
+					// $query.="
+					// 	and
+					// 		approval_status = 'A'
+					// ";	
+					// }
 					
 					if($stock_id){
 					$query.="
@@ -126,15 +126,6 @@ function printPage() { print(); } //Must be present for Iframe printing
 					while($r=mysql_fetch_assoc($result)){
 						$total_quantity += $r['quantity'];
 						$total_amount += $r['amount'];
-
-						if($r['status'] == 'F'){
-							$status = 'Finished';
-						} else if($r['status'] == 'S'){
-							$status = 'Saved';
-						}  else if($r['status'] == 'C'){
-							$status = 'Cancelled';
-						}
-
 				?>	
                         <tr>
                         	<td><?=$no?></td>
@@ -146,8 +137,7 @@ function printPage() { print(); } //Must be present for Iframe printing
                             <td style="text-align:right;"><?=number_format($r['quantity'],4,'.',',')?></td>                       
                             <td><?=$r['unit']?></td>             
                             <td style="text-align:right;"><?=number_format($r['cost'],4,'.',',')?></td>                       
-                            <td style="text-align:right;"><?=number_format($r['amount'],2,'.',',')?></td>
-                            <td><?=$status?></td>                 
+                            <td style="text-align:right;"><?=number_format($r['amount'],2,'.',',')?></td>                       
                       	</tr>
 				<?php $no++; } ?>
                 <tr>
