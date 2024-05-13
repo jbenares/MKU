@@ -45,7 +45,7 @@ function printIframe(id)
     <?php if(!empty($msg)) echo '<div class="msg_div">'.$msg.'</div>'; ?>
     <div style="padding:3px; text-align:center;" id="content">
      <?php
-     if(!empty($_REQUEST['from']) && !empty($_REQUEST['to']))
+     if((!empty($_REQUEST['from']) && !empty($_REQUEST['to'])) || !empty($_REQUEST['project_id']))
 		{
 	?>
    		<iframe id="JOframe" name="JOframe" frameborder="0" src="new_print_income_statement2.php?from=<?=$_REQUEST['from'];?>&to=<?=$_REQUEST['to']?>&project_id=<?=$_REQUEST['project_id']?>" width="100%" height="500">
