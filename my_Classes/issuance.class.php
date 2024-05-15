@@ -257,14 +257,16 @@
 		$sub_work_category_id = $form_data2['sub_work_category_id'];
 		$scope_of_work		= $form_data2['scope_of_work'];
 		
-		if($project_id == 14){
-			#FOR WAREHOUSE	
-			$project_warehouse_qty = $options->inventory_warehouse($date,$stock_id);
-		}else{
-			#FOR PROJECT
+		// if($project_id == 14){
+		// 	#FOR WAREHOUSE	
+		// 	$project_warehouse_qty = $options->inventory_warehouse($date,$stock_id);
+		// }else{
+		// 	#FOR PROJECT
+		// 	$project_warehouse_qty = $options->inventory_warehouse($date,$stock_id);	
+			
+		// }
+
 			$project_warehouse_qty = $options->inventory_warehouse($date,$stock_id);	
-			//$project_warehouse_qty = $options->inventory_projectwarehousebalance($date,$stock_id,$project_id);	
-		}
 		
 		#$issued_qty 				= $options->issuance_issuedToProject($stock_id,$project_id,$work_category_id,$sub_work_category_id,$scope_of_work);
 		#$requested_qty				= $options->total_approved_stocks_requested($stock_id,$project_id,$work_category_id,$sub_work_category_id,$scope_of_work);

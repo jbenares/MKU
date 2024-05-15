@@ -377,12 +377,14 @@ function printIframe(id)
 				#$stock = $options->getAttribute('productmaster','stock_id',$stock_id,'stock');
 
                 //$project_warehouse_qty		= $options->inventory_projectqty(NULL,$stock_id,$project_id,$scope_of_work,$work_category_id,$sub_work_category_id);
-				if($project_id == 14 ){
-					$project_warehouse_qty = $options->inventory_warehouse($date,$stock_id);	
-				}else{
-					$project_warehouse_qty = $options->inventory_warehouse($date,$stock_id);	
-					//$options->inventory_projectwarehousebalance($date,$stock_id,$project_id);	
-				}
+				// if($project_id == 14 ){
+				// 	$project_warehouse_qty = $options->inventory_warehouse($date,$stock_id);	
+				// }else{
+				// 	$project_warehouse_qty = $options->inventory_warehouse($date,$stock_id);	
+					
+				// }
+
+				$project_warehouse_qty = $options->inventory_warehouse($date,$stock_id);	
 				
                 $issued_qty 				= $options->issuance_issuedToProject($stock_id,$project_id,$work_category_id,$sub_work_category_id,$scope_of_work);
                 $requested_qty				= $options->total_approved_stocks_requested($stock_id,$project_id,$work_category_id,$sub_work_category_id,$scope_of_work);

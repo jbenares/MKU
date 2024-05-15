@@ -925,7 +925,144 @@ function po_stock_id_form($stock_id){
 	return $objResponse;
 }
 
+	function admin_override($po_detail_id, $po_header_id, $stock, $stock_id, $quantity, $cost, $view, $form_data){
+		$objResponse 	= new xajaxResponse();
+		$options		= new options();	
+		
+		$stock 		= addslashes(htmlentities($options->attr_stock($stock_id,'stock')));
+		
+		$driver_dd = $options->getTableAssoc(NULL,'driverID',"Select Driver","select * from drivers order by driver_name asc","driverID","driver_name");
 
+		$content = "
+			<div class='module_actions'>
+				<input type='hidden' name='view' value='$view' >
+				<input type='hidden' name='stock_id' value='$stock_id' >
+				<input type='hidden' name='po_detail_id' value='$po_detail_id' >
+				<input type='hidden' name='po_header_id' value='$po_header_id' >
+				
+				<div class='form-div'>
+					Stock : 
+					". $stock . "
+				</div>
+				
+				
+				<div class='form-div'>
+					Quantity : <br>
+					<input type='text' class='textbox3' name='quantity' id='quantity' value='".$quantity."' autocomplete=\"off\">
+				</div>
+				
+		
+				<div class='form-div'>
+					Price : <br>
+					<input type='text' class='textbox3' id='cost' name='cost'   value='".$cost."'>
+				</div>
+			
+			
+				<hr style='border:none; border-top:1px solid #CCC;' >
+				
+				<div class='form-div'>
+					Password: <br>
+					<input type='password' class='textbox3' name='password'>
+				</div>
+				
+				
+				
+				<div class='form-div'>
+					<input type='button' value='Edit Item' name='b' onclick=xajax_override(xajax.getFormValues('dialog_form'),xajax.getFormValues('header_form')); />
+				</div>
+			</div>
+			
+				
+		";
+		
+		$objResponse->assign('dialog_content','innerHTML',$content);
+		$objResponse->script('openDialog();');
+		//$objResponse->script("j(\"#dialog\" ).dialog( \"option\", \"title\", \"$stock\" );");
+		return $objResponse;
+	}
+
+function override($form_data,$form_data2){
+		$objResponse 	= new xajaxResponse();
+		$options		= new options();
+		$po_header_id	= $form_data['po_header_id'];
+		$po_detail_id	= $form_data['po_detail_id'];
+		$quantity		= $form_data['quantity'];
+		$stock_id		= $form_data['stock_id'];
+		$cost			= $form_data['cost'];
+		$view			= $form_data['view'];
+
+		$amount			= $quantity * $cost;
+		$password		= $form_data['password'];
+		
+		
+		// if($project_id == 14){
+		// 	#FOR WAREHOUSE	
+		// 	$project_warehouse_qty = $options->inventory_warehouse($date,$stock_id);
+		// }else{
+		// 	#FOR PROJECT
+		// 	$project_warehouse_qty = $options->inventory_warehouse($date,$stock_id);	
+			
+		// }
+
+		//$project_warehouse_qty = $options->inventory_warehouse($date,$stock_id);	
+		
+	
+		
+		// $balance = $project_warehouse_qty;
+		
+		// $balance = round($balance,6);
+		// $quantity = round($quantity,6);
+		
+		
+		// if($balance < $quantity){
+		// 	$objResponse->alert("Error : Quantity is Greater than Balance or Project does not have enough STOCKS");	
+		// }else{
+			
+		
+
+	  $sql = mysql_query("select userID from  admin_access where (password='$password' or password = '$pw') and active='1' and access = '2'");
+	  $num = mysql_num_rows($sql);
+	 	 if($num > 0){
+		  $fetch =mysql_fetch_assoc($sql);
+		  $approver = $fetch['userID'];
+		  $now = date("Y-m-d H:i:s");
+		  mysql_query("
+					insert into
+						override_logs
+					set
+						date = '$now',
+						po_detail_id = '$po_detail_id',
+						quantity = '$quantity',
+						cost = '$cost',
+						approved_by = '$approver'
+				") or $objResponse->alert(mysql_error());
+			  
+
+			  $sql_disc = mysql_query("select discount from  po_details where po_detail_id = '$po_detail_id'");
+			  $fetch_disc = mysql_fetch_assoc($sql_disc);
+			  $discount = $fetch_disc['discount'];
+ 				$total = $amount - $discount;
+				mysql_query("
+					update
+						po_detail
+					set
+						quantity='$quantity', 
+						cost='$cost',
+						amount = $total
+					where
+						po_detail_id='$po_detail_id'
+				") or $objResponse->alert(mysql_error());
+				
+				$objResponse->alert("PO data Successfully updated.");	
+				$objResponse->redirect("admin.php?view=$view&po_header_id=$po_header_id");
+			
+			return $objResponse;
+		} else {
+			$objResponse->alert("Password incorrect.");	
+			//$objResponse->redirect("admin.php?view=$view&po_header_id=$po_header_id");
+			return $objResponse;
+		}
+	}
 
 function po_stock_id($form_data,$form_data2){
 	$objResponse 	= new xajaxResponse();

@@ -54,7 +54,7 @@ function printIframe(id)
     <?php if(!empty($msg)) echo '<div class="msg_div">'.$msg.'</div>'; ?>
     <div style="padding:3px; text-align:center;" id="content">
      <?php
-		if(!empty($stock_id) && !empty($from_date) && !empty($to_date) && !empty($project_id) )
+		if(!empty($stock_id) || !empty($from_date) ||  !empty($to_date) ||  !empty($project_id) )
 		{
 	?>
    		<iframe id="JOframe" name="JOframe" frameborder="0" src="print_report_stock_card_all.php?stock_id=<?=$stock_id?>&project_id=<?=$project_id?>&from_date=<?=$from_date?>&to_date=<?=$to_date?>" width="100%" height="500">

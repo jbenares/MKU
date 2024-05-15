@@ -9,6 +9,7 @@ $categ_id		= $_REQUEST['categ_id'];
 $stock_name		= $_REQUEST['stock_name'];
 $stock_id		= (!empty($stock_name)) ? $stock_id : "";
 
+
 ?>
 
 <script type="text/javascript">
@@ -111,11 +112,23 @@ function printIframe(id)
         <input type="submit" name="b" value="View All Projects"  />
         <input type="button" value="Print" onclick="printIframe('JOframe');" />
     </div>
-    <?php if(!empty($msg)) echo '<div class="msg_div">'.$msg.'</div>'; ?>
+    <?php 
+
+    
+    if(!empty($msg)) echo '<div class="msg_div">'.$msg.'</div>'; ?>
     <div style="padding:3px; text-align:center;" id="content">
      <?php	if($from_date && $to_date && $b == "Generate Report"){ ?>
    		<iframe id="JOframe" name="JOframe" frameborder="0" src="print_po_history.php?from_date=<?=$from_date?>&to_date=<?=$to_date?>&project_id=<?=$project_id?>&categ_id=<?=$categ_id?>&stock_id=<?=($_REQUEST['stock_name']) ? $_REQUEST['stock_id'] : ""?>&work_category_id=<?=$_REQUEST['work_category_id']?>&sub_work_category_id=<?=$_REQUEST['sub_work_category_id']?>&approved=<?=$_REQUEST['approved']?>&po_status=<?=$_REQUEST['po_status']?>" width="100%" height="500">
         </iframe>
+         
+  <?php } if(empty($from_date) && empty($to_date) && !empty($project_id) && $b == "Generate Report"){ 
+
+   
+        ?>
+        <iframe id="JOframe" name="JOframe" frameborder="0" src="print_po_history.php?from_date=<?=$from_date?>&to_date=<?=$to_date?>&project_id=<?=$project_id?>&categ_id=<?=$categ_id?>&stock_id=<?=($_REQUEST['stock_name']) ? $_REQUEST['stock_id'] : ""?>&work_category_id=<?=$_REQUEST['work_category_id']?>&sub_work_category_id=<?=$_REQUEST['sub_work_category_id']?>&approved=<?=$_REQUEST['approved']?>&po_status=<?=$_REQUEST['po_status']?>" width="100%" height="500">
+        </iframe>
+         
+
     <?php }else if ($from_date && $to_date && $b == "View All Projects") {?>
 	    <iframe id="JOframe" name="JOframe" frameborder="0" src="print_po_history_all_projects.php?from_date=<?=$from_date?>&to_date=<?=$to_date?>&categ_id=<?=$categ_id?>&stock_id=<?=($_REQUEST['stock_name']) ? $_REQUEST['stock_id'] : ""?>&work_category_id=<?=$_REQUEST['work_category_id']?>&sub_work_category_id=<?=$_REQUEST['sub_work_category_id']?>&approved=<?=$_REQUEST['approved']?>&po_status=<?=$_REQUEST['po_status']?>" width="100%" height="500">
         </iframe>

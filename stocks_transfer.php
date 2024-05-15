@@ -390,12 +390,12 @@ function printIframe(id)
 				$stock			= $r['stock'];
 				$unit			= $r['unit'];
 						
-				if( $aVal['from_project_id'] == 9 ){ /*warehouse quantity*/
-					$warehouse_qty  = $options->inventory_warehouse($date,$stock_id);
-				} else {
-					$warehouse_qty = $options->inventory_projectwarehousebalance($date,$stock_id,$aVal['from_project_id']);
-				}
-				
+				// if( $aVal['from_project_id'] == 9 ){ /*warehouse quantity*/
+				// 	$warehouse_qty  = $options->inventory_warehouse($date,$stock_id);
+				// } else {
+				// 	$warehouse_qty = $options->inventory_projectwarehousebalance($date,$stock_id,$aVal['from_project_id']);
+				// }
+				$warehouse_qty = $options->inventory_projectwarehousebalance($date,$stock_id,$aVal['from_project_id']);
 				if($warehouse_qty > 0){
             ?>
             <tr>

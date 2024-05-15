@@ -606,7 +606,7 @@ function printIframe(id)
             <?php if($status == "F"){ 
 					
 			?>       
-				<input type="submit" name="b" id="b" value="Unfinish" onclick="return confirm('Warning: Make sure the item was not received yet!');" />
+				<!-- <input type="submit" name="b" id="b" value="Unfinish" onclick="return confirm('Warning: Make sure the item was not received yet!');" /> -->
             <?php
 				}
             }
@@ -1103,6 +1103,7 @@ function printIframe(id)
                 <th width="100">Cost</th>
                 <th width="100">Discount</th>
                 <th width="100">Amount</th>
+                <th width="40">Edit</th>
             </tr>
             <?php
             $i=1;
@@ -1125,8 +1126,10 @@ function printIframe(id)
                     <td><?=$r['person']?></td>
                     <td><input type='text' class='textbox3 align-right' name='detail_quantity[]' value='<?=$quantity?>'  /></td>
                     <td class="align-right"><?=number_format($cost,4,'.',',')?></td>
+                   
                     <td class="align-right"><?=number_format($r['discount']*$quantity,4,'.',',')?></td>
                     <td class="align-right"><?=number_format($amount,4,'.',',')?></td>
+                    <td class="align-right"><input type="button" value="Edit" onclick="xajax_admin_override('<?=$po_detail_id?>', '<?=$po_header_id?>', '<?=$stock?>', '<?=$stock_id?>', '<?=$quantity?>', '<?=$cost?>', '<?=$view?>', xajax.getFormValues('header_form'));"  /></td>
                     <input type='hidden' name='po_detail_id[]' value='<?=$po_detail_id?>' />
                 </tr>
             <?php

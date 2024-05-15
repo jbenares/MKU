@@ -61,12 +61,13 @@ function printPage() { print(); } //Must be present for Iframe printing
 						and
 							d.stock_id = p.stock_id
 						and
-							s.account_id = h.supplier_id
+							s.account_id = h.supplier_id";
+
+
+						  if(!empty($from_date) && !empty($to_date)){
 						
-						and
-							h.date between '$from_date' and '$to_date'
-						
-					";
+							$query.=" and h.date between '$from_date' and '$to_date'";
+							}
 					
                     if(!empty($project_id)){
                      $query.="
@@ -119,10 +120,14 @@ function printPage() { print(); } //Must be present for Iframe printing
 						order by
 							h.po_header_id, h.date asc 
 					";
+
+					//echo $query;
 					$result=mysql_query($query) or die(mysql_error());
 					$total_quantity = 0;
 					$total_amount = 0;
 					$no=1;
+
+
 					while($r=mysql_fetch_assoc($result)){
 						$total_quantity += $r['quantity'];
 						$total_amount += $r['amount'];
@@ -134,6 +139,7 @@ function printPage() { print(); } //Must be present for Iframe printing
 						}  else if($r['status'] == 'C'){
 							$status = 'Cancelled';
 						}
+
 
 				?>	
                         <tr>

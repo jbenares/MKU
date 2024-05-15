@@ -7696,10 +7696,9 @@
 				where
 					h.issuance_header_id = d.issuance_header_id
 				and status != 'C'
-				and project_id = '$project_id'
 				and stock_id = '$stock_id'
 			";
-
+			if(!empty($project_id)) $query.=" and project_id = '$project_id' ";
 			if(!empty($date)) $query.=" and  date <= '$date' ";
 
 
@@ -7837,7 +7836,7 @@
 			return DB::conn()->query($sql)->fetch_object()->quantity;
 		}
 
-		function inventory_warehouse($date,$stock_id,$quantity_type = "quantity"){
+		function inventory_warehouse($date,$stock_id,$quantity_type = "quantity", $project_id){
 			/*
 				RR (WAREHOUSE - 9)  - TRANSFERS + STOCKS RETURN
 			*/
@@ -7848,11 +7847,18 @@
 
 			if($quantity_type == "quantity"){
 
+				// $rr_qty			= $this->inventory_receiving($date,$stock_id,NULL,'W');	#has cum
+				// $issuance_qty 	= $this->inventory_issuance($date,$stock_id,14);	#has cum
+				// $transfer_qty	= $this->inventory_stockstransfer($date,$stock_id,14);
+				// $returns_qty	= $this->inventory_stocksreturn($date,$stock_id);
+				// $adjustments	= $this->inventory_adjustments($date,$stock_id,14);
+				// $preturn_qty    = $this->getPurchaseReturn($date,$stock_id);
+
 				$rr_qty			= $this->inventory_receiving($date,$stock_id,NULL,'W');	#has cum
-				$issuance_qty 	= $this->inventory_issuance($date,$stock_id,14);	#has cum
-				$transfer_qty	= $this->inventory_stockstransfer($date,$stock_id,14);
+				$issuance_qty 	= $this->inventory_issuance($date,$stock_id, $project_id);	#has cum
+				$transfer_qty	= $this->inventory_stockstransfer($date,$stock_id,$project_id);
 				$returns_qty	= $this->inventory_stocksreturn($date,$stock_id);
-				$adjustments	= $this->inventory_adjustments($date,$stock_id,14);
+				$adjustments	= $this->inventory_adjustments($date,$stock_id,$project_id);
 				$preturn_qty    = $this->getPurchaseReturn($date,$stock_id);
 
 			}else{

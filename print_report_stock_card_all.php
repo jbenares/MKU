@@ -107,6 +107,7 @@ html[xmlns] .clearfix {
                 	<th>Date</th>
                     <th>Type of Transaction</th>
                     <th>Reference</th>
+                    <th>Project</th>
                     <th>Quantity In</th>
                     <th>Quantity Out</th>
                     <th>Balance</th>
@@ -117,7 +118,7 @@ html[xmlns] .clearfix {
 				$balance = $options->inventory_projectwarehousebalance($beginning_date,$stock_id,$project_id);
 				?>
                 <tr>
-                	<td colspan="5">Beginning Balance</td>
+                	<td colspan="6">Beginning Balance</td>
                     <!-- <td class="align-right"><?=number_format($balance,2,'.',',')?></td> -->
                     <td><?php echo $balance; ?></td>
                 </tr>
@@ -135,13 +136,18 @@ html[xmlns] .clearfix {
 						rr_header as h, rr_detail as d
 					where
 						h.rr_header_id = d.rr_header_id
-					and status != 'C'
-					and stock_id = '$stock_id'
-					and rr_in = 'P'
-					and date between '$from_date' and '$to_date'
-					and project_id = '$project_id'
-					and rr_type = 'M'
-				";
+					and status != 'C' and rr_type = 'M'";
+
+					if($stock_id){
+					$query .= " and stock_id = '$stock_id'";
+					}
+					if($from_date && $to_date){
+					$query .=  " and date between '$from_date' and '$to_date'";
+					}
+					if($project_id){
+					$query .=  " and project_id = '$project_id'";
+
+					}
 				
 			
 				$result=mysql_query($query) or die(mysql_error());
@@ -152,8 +158,9 @@ html[xmlns] .clearfix {
 					$header_id			= $r['rr_header_id'];
 					$header_id_pad		= str_pad($header_id,7,0,STR_PAD_LEFT);
 					$account_id			= $r['supplier_id'];
+					$proj_id			= $r['project_id'];
 					$account			= $options->getAttribute('supplier','account_id',$account_id,'account');
-					
+					$project			= $options->getAttribute('projects','project_id',$proj_id,'project_name');
 					
 					$qtyin				= $r['quantity'];
 					$qtyout				= 0;
@@ -162,6 +169,7 @@ html[xmlns] .clearfix {
 						'date' 		=> $r['date'],
 						'transac' 	=> "Stocks Receiving ",
 						'reference'	=> "M.R.R #: $header_id_pad ",
+						'project'	=> $project,
 						'qtyin' 	=> $qtyin,
 						'qtyout'	=> $qtyout
 						
@@ -182,15 +190,23 @@ html[xmlns] .clearfix {
 					where
 						h.transfer_header_id = d.transfer_header_id
 					and
-						status != 'C'
-					and stock_id = '$stock_id'
-					and date between '$from_date' and '$to_date'
-					and 
-					(
+						status != 'C'";
+
+
+					if($stock_id){
+					$query .= " and stock_id = '$stock_id'";
+					}
+					if($from_date && $to_date){
+					$query .=  " and date between '$from_date' and '$to_date'";
+					}
+					if($stock_id){
+					$query .=  " and (
 						project_id = '$project_id'
 						or from_project_id = '$project_id'
-					)
-				";
+					)";
+					}
+
+
 			
 				$result=mysql_query($query) or die(mysql_error());
 				?>
@@ -203,20 +219,30 @@ html[xmlns] .clearfix {
 					
 					if( $r['from_project_id'] == $project_id ){ #out
 
+						$proj_id			= $r['from_project_id'];
+						$project			= $options->getAttribute('projects','project_id',$proj_id,'project_name');
+
+
 						$data[]= array(
 							'date' 		=> $r['date'],
 							'transac' 	=> "Stocks Transfer",
 							'reference'	=> "T.S #: $header_id_pad ",
+							'project'	=> $project,
 							'qtyin' 	=> 0,
 							'qtyout'	=> $r['quantity']
 						);
 
 					} else if( $r['project_id'] == $project_id ) { #in
 
+						$proj_id			= $r['project_id'];
+						$project			= $options->getAttribute('projects','project_id',$proj_id,'project_name');
+
+
 						$data[]= array(
 							'date' 		=> $r['date'],
 							'transac' 	=> "Stocks Transfer",
 							'reference'	=> "T.S #: $header_id_pad ",
+							'project'	=> $project,
 							'qtyin' 	=> $r['quantity'],
 							'qtyout'	=> 0
 						);
@@ -240,12 +266,19 @@ html[xmlns] .clearfix {
 						issuance_header as h, issuance_detail as d
 					where
 						h.issuance_header_id = d.issuance_header_id
-					and status != 'C'
-					and project_id = '$project_id'
-					and stock_id = '$stock_id'
-					and date between '$from_date' and '$to_date'
-				";
-			
+					and status != 'C'";
+
+					if($stock_id){
+					$query .= " and stock_id = '$stock_id'";
+					}
+					if($from_date && $to_date){
+					$query .=  " and date between '$from_date' and '$to_date'";
+					}
+					if($project_id){
+					$query .=  " and project_id = '$project_id'";
+
+					}
+
 				$result=mysql_query($query) or die(mysql_error());
 				?>
                 
@@ -254,6 +287,8 @@ html[xmlns] .clearfix {
 					$header_id			= $r['issuance_header_id'];
 					$header_id_pad		= str_pad($header_id,7,0,STR_PAD_LEFT);					
 					
+					$proj_id			= $r['project_id'];
+					$project			= $options->getAttribute('projects','project_id',$proj_id,'project_name');
 					$qtyin				= 0;
 					$qtyout				=  $r['quantity'];
 					
@@ -261,6 +296,7 @@ html[xmlns] .clearfix {
 						'date' 		=> $r['date'],
 						'transac' 	=> "Stocks Issuance",
 						'reference'	=> "R.I.S #: $header_id_pad ",
+						'project'	=> $project,
 						'qtyin' 	=> $qtyin,
 						'qtyout'	=> $qtyout
 					);
@@ -280,11 +316,19 @@ html[xmlns] .clearfix {
 						invadjust_header as h, invadjust_detail as d 
 					where
 						h.invadjust_header_id=d.invadjust_header_id
-					and status != 'C'
-					and date between '$from_date' and '$to_date'
-					and stock_id='$stock_id'
-					and project_id = '$project_id'
-				";
+					and status != 'C'";
+
+					if($stock_id){
+						$query .= " and stock_id = '$stock_id'";
+					}
+					if($from_date && $to_date){
+						$query .=  " and date between '$from_date' and '$to_date'";
+					}
+					if($project_id){
+						$query .=  " and project_id = '$project_id'";
+
+					}
+
 				$result=mysql_query($query) or die(mysql_error());
 				?>
              
@@ -292,11 +336,14 @@ html[xmlns] .clearfix {
 				while($r=mysql_fetch_assoc($result)):
 					$invadjust_header_id 		= $r['invadjust_header_id'];
 					$invadjust_header_id_pad	= str_pad($invadjust_header_id,7,0,STR_PAD_LEFT);
-					
+					$proj_id			= $r['project_id'];
+					$project			= $options->getAttribute('projects','project_id',$proj_id,'project_name');
+
 					$data[]= array(
 						'date' 		=> $r['date'],
 						'transac' 	=> "Inventory Adjustments ",
 						'reference'	=> "ADJ #: $invadjust_header_id_pad",
+						'project' 	=> $project,
 						'qtyin' => ($r['quantity']>=0)?$r['quantity']:0,
 						'qtyout' =>($r['quantity']<0)?abs($r['quantity']):0
 						
@@ -318,12 +365,19 @@ html[xmlns] .clearfix {
 						return_header as h, return_detail as d
 					where
 						h.return_header_id = d.return_header_id
-					and status != 'C'
-					and stock_id = '$stock_id'
-					and date between '$from_date' and '$to_date'
-					and project_id = '$project_id'
-				";
-				
+					and status != 'C'";
+
+					if($stock_id){
+						$query .= " and stock_id = '$stock_id'";
+					}
+					if($from_date && $to_date){
+						$query .=  " and date between '$from_date' and '$to_date'";
+					}
+					if($project_id){
+						$query .=  " and project_id = '$project_id'";
+
+					}
+
 			
 				$result=mysql_query($query) or die(mysql_error());
 				?>
@@ -334,7 +388,8 @@ html[xmlns] .clearfix {
 					$header_id_pad		= str_pad($header_id,7,0,STR_PAD_LEFT);
 					$account_id			= $r['supplier_id'];
 					$account			= $options->getAttribute('supplier','account_id',$account_id,'account');
-					
+					$proj_id			= $r['project_id'];
+					$project			= $options->getAttribute('projects','project_id',$proj_id,'project_name');
 					$qtyout				= 0;
 					$qtyin				= $r['quantity'];
 					
@@ -342,6 +397,7 @@ html[xmlns] .clearfix {
 						'date' 		=> $r['date'],
 						'transac' 	=> "Stock Returns",
 						'reference'	=> "RET #: $header_id_pad ",
+						'project' 	=> $project,
 						'qtyin' 	=> $qtyin,
 						'qtyout'	=> $qtyout
 						
@@ -362,12 +418,19 @@ html[xmlns] .clearfix {
 						fabrication_product as d 
 						inner join fabrication as h on h.fabrication_id = d.fabrication_id
 					where
-						status != 'C'
-					and product_stock_id = '$stock_id'
-					and date between '$from_date' and '$to_date'
-					and to_project_id = '$project_id'
-					and product_void = '0'
-				";
+						status != 'C' and product_void = '0'";
+
+						if($stock_id){
+						$query .= " and product_stock_id = '$stock_id'";
+					}
+					if($from_date && $to_date){
+						$query .=  " and date between '$from_date' and '$to_date'";
+					}
+					if($project_id){
+						$query .=  " and to_project_id = '$project_id'";
+
+					}
+
 
 				$result=mysql_query($query) or die(mysql_error());
 				?>
@@ -378,7 +441,9 @@ html[xmlns] .clearfix {
 					$header_id_pad		= str_pad($header_id,7,0,STR_PAD_LEFT);
 					$account_id			= "";
 					$account			= "";
-					
+					$proj_id			= $r['project_id'];
+					$project			= $options->getAttribute('projects','project_id',$proj_id,'project_name');
+
 					$qtyout				= 0;
 					$qtyin				= $r['product_quantity'];
 					
@@ -386,6 +451,7 @@ html[xmlns] .clearfix {
 						'date' 		=> $r['date'],
 						'transac' 	=> "Finished Product Fabrication",
 						'reference'	=> "FAB #: $header_id_pad ",
+						'project' 	=> $project,
 						'qtyin' 	=> $qtyin,
 						'qtyout'	=> $qtyout
 					);
@@ -403,11 +469,20 @@ html[xmlns] .clearfix {
 					from
 						fabrication
 					where
-						status != 'C'
-					and excess_stock_id = '$stock_id'
-					and date between '$from_date' and '$to_date'
-					and from_project_id = '$project_id'
-				";
+						status != 'C'";
+				
+					if($stock_id){
+						$query .= " and excess_stock_id = '$stock_id'";
+					}
+					if($from_date && $to_date){
+						$query .=  " and date between '$from_date' and '$to_date'";
+					}
+					if($project_id){
+						$query .=  " and from_project_id = '$project_id'";
+
+					}
+
+				
 
 				$result=mysql_query($query) or die(mysql_error());
 				?>
@@ -418,7 +493,8 @@ html[xmlns] .clearfix {
 					$header_id_pad		= str_pad($header_id,7,0,STR_PAD_LEFT);
 					$account_id			= "";
 					$account			= "";
-					
+					$proj_id			= $r['project_id'];
+					$project			= $options->getAttribute('projects','project_id',$proj_id,'project_name');
 					$qtyout				= 0;
 					$qtyin				= $r['excess_quantity'];
 					
@@ -426,6 +502,7 @@ html[xmlns] .clearfix {
 						'date' 		=> $r['date'],
 						'transac' 	=> "Finished Product Waste Cut",
 						'reference'	=> "FAB #: $header_id_pad ",
+						'project'	=> $project,
 						'qtyin' 	=> $qtyin,
 						'qtyout'	=> $qtyout
 					);
@@ -444,12 +521,20 @@ html[xmlns] .clearfix {
 						fabrication_raw_mat as d 
 						inner join fabrication as h on h.fabrication_id = d.fabrication_id
 					where
-						status != 'C'
-					and raw_mat_stock_id = '$stock_id'
-					and date between '$from_date' and '$to_date'
-					and from_project_id = '$project_id'
-					and raw_mat_void = '0'
-				";
+						status != 'C' and raw_mat_void = '0'";
+				
+
+						if($stock_id){
+						$query .= " and raw_mat_stock_id = '$stock_id'";
+					}
+					if($from_date && $to_date){
+						$query .=  " and date between '$from_date' and '$to_date'";
+					}
+					if($project_id){
+						$query .=  " and from_project_id = '$project_id'";
+
+					}
+
 
 				$result=mysql_query($query) or die(mysql_error());
 				?>
@@ -460,6 +545,8 @@ html[xmlns] .clearfix {
 					$header_id_pad		= str_pad($header_id,7,0,STR_PAD_LEFT);
 					$account_id			= "";
 					$account			= "";
+					$proj_id			= $r['project_id'];
+					$project			= $options->getAttribute('projects','project_id',$proj_id,'project_name');
 					
 					$qtyout				= $r['raw_mat_quantity'];
 					$qtyin				= 0;
@@ -468,6 +555,7 @@ html[xmlns] .clearfix {
 						'date' 		=> $r['date'],
 						'transac' 	=> "Raw Mat Fabrication",
 						'reference'	=> "FAB #: $header_id_pad ",
+						'project'	=> $project,
 						'qtyin' 	=> $qtyin,
 						'qtyout'	=> $qtyout
 					);
@@ -486,12 +574,23 @@ html[xmlns] .clearfix {
 						sales_return_header as h
 						inner join sales_return_detail as d on h.sales_return_header_id = d.sales_return_header_id
 					where
-						status != 'C'
-					and stock_id = '$stock_id'
-					and date between '$from_date' and '$to_date'
-					and project_id = '$project_id'
-					and sales_return_void = '0'
-				";
+						status != 'C' and sales_return_void = '0'";
+					
+
+					if($stock_id){
+						$query .= " and stock_id = '$stock_id'";
+					}
+					if($from_date && $to_date){
+						$query .=  " and date between '$from_date' and '$to_date'";
+					}
+					if($project_id){
+						$query .=  " and project_id = '$project_id'";
+
+					}
+
+
+
+				
 
 				$result=mysql_query($query) or die(mysql_error());
 				?>
@@ -502,7 +601,8 @@ html[xmlns] .clearfix {
 					$header_id_pad		= str_pad($header_id,7,0,STR_PAD_LEFT);
 					$account_id			= "";
 					$account			= "";
-					
+					$proj_id			= $r['project_id'];
+					$project			= $options->getAttribute('projects','project_id',$proj_id,'project_name');
 					$qtyout				= 0;
 					$qtyin				= $r['quantity'];
 					
@@ -510,6 +610,7 @@ html[xmlns] .clearfix {
 						'date' 		=> $r['date'],
 						'transac' 	=> "Sales Return",
 						'reference'	=> "SR #: $header_id_pad ",
+						'project'	=> $project,
 						'qtyin' 	=> $qtyin,
 						'qtyout'	=> $qtyout
 					);
@@ -534,6 +635,7 @@ html[xmlns] .clearfix {
 						$quantity_out 	= $row[qtyout];
 						
 						$reference		= $row['reference'];
+						$project		= $row['project'];
 						$account		= $row['account'];
 						
 						
@@ -543,6 +645,7 @@ html[xmlns] .clearfix {
 							<td><?=date("n/j/Y",strtotime($row['date']))?></td>
 							<td><?=$row['transac']?></td>
                             <td><?=$reference?></td>
+                            <td><?=$project?></td>
 							<td class="align-right"><?=number_format($row['qtyin'],2,'.',',')?></td>
 							<td class="align-right"><?=number_format($row['qtyout'],2,'.',',')?></td>
 							<td class="align-right"><?=number_format($balance,2,'.',',')?></td>

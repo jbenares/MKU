@@ -76,7 +76,7 @@ function printPage() { print(); } //Must be present for Iframe printing
 						$cost = $r['cost'];
 
 						
-						$warehouse_qty  = $options->inventory_warehouse(NULL,$stock_id);	
+						$warehouse_qty  = $options->inventory_warehouse(NULL,$stock_id, 'quantity', $project_id);	
 						
 						if($warehouse_qty > 0){
 				?>	
