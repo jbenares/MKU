@@ -42,6 +42,7 @@ function printPage() { print(); } //Must be present for Iframe printing
                     <th>PO#</th>
 					<th>SCOPE OF WORK</th>
                     <th>SUPPLIER</th>
+                    <th>CATEGORY</th>
                     <th>ITEM</th>
                     <th>QTY</th>
                     <th>UNIT</th>
@@ -53,7 +54,7 @@ function printPage() { print(); } //Must be present for Iframe printing
              	<?php
 					$query="
 						select
-							h.date,d.quantity,d.amount,d.cost,h.po_header_id,account,stock,unit,h.work_category_id,h.sub_work_category_id, h.status
+							h.date,d.quantity,d.amount,d.cost,h.po_header_id,account,stock,unit,h.work_category_id,h.sub_work_category_id, h.status, p.categ_id1
 						from
 							po_header as h, po_detail as d, productmaster as p, supplier as s
 						where
@@ -125,6 +126,7 @@ function printPage() { print(); } //Must be present for Iframe printing
 					$result=mysql_query($query) or die(mysql_error());
 					$total_quantity = 0;
 					$total_amount = 0;
+					$unknown=0;
 					$no=1;
 
 
@@ -141,13 +143,18 @@ function printPage() { print(); } //Must be present for Iframe printing
 						}
 
 
+						if($r['categ_id1'] == 0){
+							$unknown+=$r['amount'];
+
+						}
 				?>	
                         <tr>
                         	<td><?=$no?></td>
                             <td><?=date("m/d/Y",strtotime($r['date']))?></td>
                             <td><?=str_pad($r['po_header_id'],7,0,STR_PAD_LEFT)?></td> 
 							<td><?=$options->getAttribute('work_category','work_category_id',$r[work_category_id],'work').'<br/>'.$options->getAttribute('work_category','work_category_id',$r[sub_work_category_id],'work')?></td>  								
-                            <td><?=$r['account']?></td>                       
+                            <td><?=$r['account']?></td>        
+                            <td><?=$options->getAttribute('categories','categ_id',$r[categ_id1],'category')?></td>               
                             <td><?=$r['stock']?></td>                       
                             <td style="text-align:right;"><?=number_format($r['quantity'],4,'.',',')?></td>                       
                             <td><?=$r['unit']?></td>             
@@ -162,10 +169,32 @@ function printPage() { print(); } //Must be present for Iframe printing
                     <td>&nbsp;</td>
 					<td>&nbsp;</td>
                     <td>&nbsp;</td>
-                    <td style="text-align:right; font-weight:bold; border-top:1px solid #000;"><?=number_format($total_quantity,2,'.',',')?></td>
                     <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td style="text-align:right; font-weight:bold; border-top:1px solid #000;"><?=number_format($total_quantity,2,'.',',')?></td>
 					<td>&nbsp;</td>
                     <td style="text-align:right; font-weight:bold; border-top:1px solid #000;"><?=number_format($total_amount,2,'.',',')?></td>
+                </tr>
+                 <tr>
+                	<td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+					<td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td colspan='3' style='text-align: right;'>Total of Unknown Category:</td>
+                    <td style="text-align:right; font-weight:bold;"><?=number_format($unknown,2,'.',',')?></td>
+                </tr>
+                <?php $agg = $total_amount - $unknown; ?>
+                  <tr>
+                	<td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+					<td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td colspan='3' style='text-align: right;'>Total of Cement, Aggregates and Hardware:</td>
+                    <td style="text-align:right; font-weight:bold; border-top:1px solid #000;"><?=number_format($agg,2,'.',',')?></td>
                 </tr>
             </table>
         

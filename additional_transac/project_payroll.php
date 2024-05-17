@@ -37,7 +37,7 @@ function insertTransactionToDB($form_data){
     $sql .= "
         set
             date       = '$form_data[date]',            
-            project_id = '$form_data[project_id]',                        
+            project_id = '$form_data[project_id]',                
             remarks    = '".addslashes($form_data['remarks'])."',               
     ";
 
@@ -358,7 +358,7 @@ if($_REQUEST['project_payroll_header_id'] && $_REQUEST['b'] != "Search"){
                         <td>Date</td>
                         <td><input type="text" class="textbox datepicker" name="search_date" value="<?=$aVal['search_date']?>" /></td>
 
-                        <td>SR #</td>
+                        <td>PP #</td>
                         <td><input type="text" class="textbox" name="search_sales_return_header_id" id="search_sales_return_header_id" value="<?=$_REQUEST['search_sales_return_header_id']?>"></td>                        
                     </tr>                    
                 </tbody>
@@ -405,7 +405,7 @@ if($_REQUEST['project_payroll_header_id'] && $_REQUEST['b'] != "Search"){
                 <tr>				
                     <td width="20">#</td>
                     <td width="20"></td>                    
-                    <td style="text-align:left;">SR#</td>
+                    <td style="text-align:left;">PP#</td>
                     <td style="text-align:left;">DATE</td>                                        
                     <td style="text-align:left;">PROJECT</td>                                        
                     <td style="text-align:left;">REMARKS</td>                                                    
@@ -443,7 +443,7 @@ if($_REQUEST['project_payroll_header_id'] && $_REQUEST['b'] != "Search"){
                 <p>                
                     <?php if( !empty($aVal['project_payroll_header_id']) ){ ?>
                     <div>
-                        SR#: <br>
+                        PP#: <br>
                         <span style='font-weight:bold; font-size:14px;'><?=str_pad($aVal['project_payroll_header_id'], 7,0,STR_PAD_LEFT)?></span>
                     </div>
                     <?php } ?>
@@ -462,6 +462,7 @@ if($_REQUEST['project_payroll_header_id'] && $_REQUEST['b'] != "Search"){
                         <input type="text" class="textbox project" value="<?=lib::getAttribute('projects','project_id',$aVal['project_id'],'project_name')?>">
                         <input type="hidden" name="project_id" value="<?=$aVal['project_id']?>" >
                     </div>
+
                     
                 </p>           
                 <p>

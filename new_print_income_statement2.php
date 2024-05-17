@@ -16,7 +16,7 @@ p.project_id = '$project_id'") or die (mysql_error());
 $rp = mysql_fetch_assoc($sqlp);
 
 
-echo $from . " and " . $to;
+//echo $from . " and " . $to;
 $options=new options();	
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -244,19 +244,34 @@ Address : <?=$rp['address']?></div>
 	// 					h.date between '$from' and '$to'
 	// 					group by c.categ_id") or die (mysql_error());
 
+	// $querym = "select
+	// 					sum(h.netamount) as amount,
+	// 					c.category
+	// 					from
+	// 					rr_header as h,
+	// 					rr_detail as d,
+	// 					productmaster as p,
+	// 					categories as c
+	// 					where
+	// 					h.rr_header_id = d.rr_header_id and
+	// 					d.stock_id = p.stock_id and
+	// 					p.categ_id1 = c.categ_id and
+	// 					h.`status` != 'C'";
+
 	$querym = "select
-						sum(h.netamount) as amount,
+						sum(d.amount) as amount,
 						c.category
 						from
-						rr_header as h,
-						rr_detail as d,
+						po_header as h,
+						po_detail as d,
 						productmaster as p,
 						categories as c
 						where
-						h.rr_header_id = d.rr_header_id and
+						h.po_header_id = d.po_header_id and
 						d.stock_id = p.stock_id and
 						p.categ_id1 = c.categ_id and
 						h.`status` != 'C'";
+
 
 			if(!empty($project_id)){
 				$querym .= " and h.project_id = '$project_id' ";
@@ -502,7 +517,7 @@ Address : <?=$rp['address']?></div>
 	$net_income = $net - $total_operating_expense;
 	?>
 	<tr>
-		<td width="300" id="totalities2" style=" font-weight: bold;">Net Income(Loss)</td>
+		<td width="300" id="totalities2" style=" font-weight: bold;">Net Income</td>
 		<td></td>		
 		<td></td>
 		<td width="170" style="text-align: right; border-bottom: 3px double black; font-weight: bold;"><?=number_format($net_income,2)?></td>
