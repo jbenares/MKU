@@ -925,7 +925,7 @@ function po_stock_id_form($stock_id){
 	return $objResponse;
 }
 
-	function admin_override($po_detail_id, $po_header_id, $stock, $stock_id, $quantity, $cost, $view, $form_data){
+	function admin_override($po_detail_id, $po_header_id, $stock, $stock_id, $quantity, $cost, $view, $form_data, $details, $category){
 		$objResponse 	= new xajaxResponse();
 		$options		= new options();	
 		
@@ -939,13 +939,18 @@ function po_stock_id_form($stock_id){
 				<input type='hidden' name='stock_id' value='$stock_id' >
 				<input type='hidden' name='po_detail_id' value='$po_detail_id' >
 				<input type='hidden' name='po_header_id' value='$po_header_id' >
+				<input type='hidden' name='category' value='$category' >
 				
 				<div class='form-div'>
 					Stock : 
 					". $stock . "
 				</div>
 				
-				
+				<div class='form-div'>
+					Details : <br>
+					<input type='text' class='textbox3' name='details' id='details' value='".$details."' autocomplete=\"off\">
+				</div>
+
 				<div class='form-div'>
 					Quantity : <br>
 					<input type='text' class='textbox3' name='quantity' id='quantity' value='".$quantity."' autocomplete=\"off\">
@@ -955,18 +960,19 @@ function po_stock_id_form($stock_id){
 				<div class='form-div'>
 					Price : <br>
 					<input type='text' class='textbox3' id='cost' name='cost'   value='".$cost."'>
-				</div>
+				</div>";
 			
-			
-				<hr style='border:none; border-top:1px solid #CCC;' >
+			if($category != '8'){
+				$content .="<hr style='border:none; border-top:1px solid #CCC;' >
 				
 				<div class='form-div'>
 					Password: <br>
 					<input type='password' class='textbox3' name='password'>
-				</div>
+				</div>";
+			}
 				
 				
-				
+			$content .="
 				<div class='form-div'>
 					<input type='button' value='Edit Item' name='b' onclick=xajax_override(xajax.getFormValues('dialog_form'),xajax.getFormValues('header_form')); />
 				</div>
@@ -988,43 +994,30 @@ function override($form_data,$form_data2){
 		$po_detail_id	= $form_data['po_detail_id'];
 		$quantity		= $form_data['quantity'];
 		$stock_id		= $form_data['stock_id'];
+		$stock		= $form_data['stock'];
+		$details		= $form_data['details'];
+		$category		= $form_data['category'];
 		$cost			= $form_data['cost'];
 		$view			= $form_data['view'];
 
 		$amount			= $quantity * $cost;
 		$password		= $form_data['password'];
+		$pw = 			md5($password);
 		
 		
-		// if($project_id == 14){
-		// 	#FOR WAREHOUSE	
-		// 	$project_warehouse_qty = $options->inventory_warehouse($date,$stock_id);
-		// }else{
-		// 	#FOR PROJECT
-		// 	$project_warehouse_qty = $options->inventory_warehouse($date,$stock_id);	
-			
-		// }
-
-		//$project_warehouse_qty = $options->inventory_warehouse($date,$stock_id);	
 		
-	
-		
-		// $balance = $project_warehouse_qty;
-		
-		// $balance = round($balance,6);
-		// $quantity = round($quantity,6);
-		
-		
-		// if($balance < $quantity){
-		// 	$objResponse->alert("Error : Quantity is Greater than Balance or Project does not have enough STOCKS");	
-		// }else{
-			
-		
-
+   if($category != 8){
 	  $sql = mysql_query("select userID from  admin_access where (password='$password' or password = '$pw') and active='1' and access = '2'");
 	  $num = mysql_num_rows($sql);
+	   $fetch =mysql_fetch_assoc($sql);
+	   $approver = $fetch['userID'];
+	} else {
+		$num = 1;
+		  $approver=0;
+	}
 	 	 if($num > 0){
-		  $fetch =mysql_fetch_assoc($sql);
-		  $approver = $fetch['userID'];
+		 
+		  
 		  $now = date("Y-m-d H:i:s");
 		  mysql_query("
 					insert into
@@ -1046,6 +1039,7 @@ function override($form_data,$form_data2){
 					update
 						po_detail
 					set
+						details='$details',
 						quantity='$quantity', 
 						cost='$cost',
 						amount = $total
@@ -1062,6 +1056,98 @@ function override($form_data,$form_data2){
 			//$objResponse->redirect("admin.php?view=$view&po_header_id=$po_header_id");
 			return $objResponse;
 		}
+	}
+
+	function update_supplier($po_header_id, $supplier_id, $view, $remarks){
+		$objResponse 	= new xajaxResponse();
+		$options		= new options();	
+		
+		
+			$query="select * from supplier order by account";
+			$result=mysql_query($query);
+
+		$content = "
+			<div class='module_actions'>
+				<input type='hidden' name='po_header_id' value='$po_header_id' >
+					<input type='hidden' name='view' value='$view' >
+				
+				<div class='form-div'>
+					Update Details
+				</div>
+				
+				<div class='form-div'>
+					Supplier Name : <br>";
+						$content.="
+						<select name='supplier' id='supplier' class='required' title='Please Select Supplier'>
+					";
+				$content.="
+					<option value=''>Select Supplier:</option>
+				";
+
+				while($row=mysql_fetch_assoc($result))
+				{
+					if($supplier_id==$row[account_id])
+					{
+						$content.="
+							<option value='$row[account_id]' selected='selected' >$row[account]</option>
+						";
+					}else{
+						$content.="
+							<option value='$row[account_id]' >$row[account]</option>
+						";
+					}
+
+				}
+				$content.="
+					</select>
+				";
+							
+			$content .="<div class='form-div'>
+					Remarks: <br>
+					 <textarea class='textarea_small' name='remarks'>".$remarks."</textarea>
+				</div>";
+				
+				
+			$content .="
+				<div class='form-div'>
+					<input type='button' value='Update Details' name='b' onclick=xajax_update_supplier_process(xajax.getFormValues('dialog_form'),xajax.getFormValues('header_form')); />
+				</div>
+			</div>
+			
+				
+		";
+		
+		$objResponse->assign('dialog_content','innerHTML',$content);
+		$objResponse->script('openDialog();');
+		//$objResponse->script("j(\"#dialog\" ).dialog( \"option\", \"title\", \"$stock\" );");
+		return $objResponse;
+	}
+
+	function update_supplier_process($form_data,$form_data2){
+		$objResponse 	= new xajaxResponse();
+		$options		= new options();
+		$po_header_id	= $form_data['po_header_id'];
+		$supplier	= $form_data['supplier'];
+		$remarks	= $form_data['remarks'];
+		$view			= $form_data['view'];
+
+		
+	
+			mysql_query("
+				update
+					po_header
+				set
+					supplier_id='$supplier',
+					remarks='$remarks'
+				where
+					po_header_id='$po_header_id'
+			") or $objResponse->alert(mysql_error());
+			
+			$objResponse->alert("PO Details successfully updated.");	
+			$objResponse->redirect("admin.php?view=$view&po_header_id=$po_header_id");
+		
+		return $objResponse;
+		
 	}
 
 function po_stock_id($form_data,$form_data2){

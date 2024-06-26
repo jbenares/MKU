@@ -115,7 +115,8 @@ function printIframe(id)
     <?php if(!empty($msg)) echo '<div class="msg_div">'.$msg.'</div>'; ?>
     <div style="padding:3px; text-align:center;" id="content">
      <?php
-		if(!empty($_REQUEST['startingdate']) && !empty($_REQUEST['endingdate']) && !empty($_REQUEST['gchart_id']))
+		//if(!empty($_REQUEST['startingdate']) && !empty($_REQUEST['endingdate']) && !empty($_REQUEST['gchart_id']))
+     if((!empty($_REQUEST['startingdate']) && !empty($_REQUEST['endingdate'])) || !empty($_REQUEST['gchart_id']) || !empty($_REQUEST['project_id']))
 		{
 	?>
    		<iframe id="JOframe" name="JOframe" frameborder="0" src="acctg_print_gl_listings3.php?startingdate=<?=$_REQUEST['startingdate'];?>&endingdate=<?=$_REQUEST['endingdate'];?>&gchart_id=<?=$_REQUEST['gchart_id']?>&project_id=<?=$_REQUEST['project_id']?>&listing_type=2&account_id=<?=$_REQUEST['account_id']?>&sorting_type=<?=$_REQUEST['sorting_type']?>" width="100%" height="500"></iframe>

@@ -209,10 +209,15 @@ html[xmlns] .clearfix {
 					h.gltran_header_id = d.gltran_header_id and
 					d.gchart_id = g.gchart_id and
 					h.`status` != 'C' and
-					g.gchart_void = '0' and
-					h.date between '$startingdate' and '$endingdate' and
-					(g.parent_gchart_id = '$account' or g.gchart_id = '$account')
-				";
+					g.gchart_void = '0' ";
+
+				if(!empty($startingdate) && !empty($endingdate) ){
+					$query .= " and h.date between '$startingdate' and '$endingdate'";
+				}
+
+				if(!empty($account)){
+					$query .= " and (g.parent_gchart_id = '$account' or g.gchart_id = '$account')";
+				}
 				
 				if(!empty($project_id)){
 				$query .= "

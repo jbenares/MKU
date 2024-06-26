@@ -38,6 +38,11 @@ function printIframe(id)
             <input type="text" class="textbox" id="project_name" name="project_name" value="<?=$_REQUEST['project_name']?>" onclick="this.select();"  />
             <input type="hidden" name="project_id"  id="project_id" value="<?=$_REQUEST['project_id']?>" class="required" title="Please select Project" />
         </div> 
+
+         <div class="inline">
+            WHT %<br />
+            <input type="text" class="textbox3" name="tax" value='<?php echo $_REQUEST['tax'];?>' >
+        </div>
                 
      	<input type="submit" value="Generate Report"  />
         <input type="button" value="Print" onclick="printIframe('JOframe');" />
@@ -48,7 +53,7 @@ function printIframe(id)
      if((!empty($_REQUEST['from']) && !empty($_REQUEST['to'])) || !empty($_REQUEST['project_id']))
 		{
 	?>
-   		<iframe id="JOframe" name="JOframe" frameborder="0" src="new_print_income_statement2.php?from=<?=$_REQUEST['from'];?>&to=<?=$_REQUEST['to']?>&project_id=<?=$_REQUEST['project_id']?>" width="100%" height="500">
+   		<iframe id="JOframe" name="JOframe" frameborder="0" src="new_print_income_statement2.php?from=<?=$_REQUEST['from'];?>&to=<?=$_REQUEST['to']?>&project_id=<?=$_REQUEST['project_id']?>&tax=<?=$_REQUEST['tax']?>" width="100%" height="500">
         </iframe>
     </div>
     <?php }?>

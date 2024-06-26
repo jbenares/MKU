@@ -119,6 +119,7 @@ function printIframe(id)
             <th>Payroll #</th>
             <th>Date</th>
             <th>Project</th>
+            <th>Foreman</th>
             <th>Total Amount</th>
             <th>Status</th>
         </tr>  
@@ -143,6 +144,11 @@ function printIframe(id)
 			$project_code		= $options->attr_Project($project_id,'project_code');
 			$project_name_code	= ($project_id)?"$project_name - $project_code":"";
 			$date				= $r['date'];
+
+	        $foreman_id			= $r['foreman_id'];
+			$fname		= $options->attr_Employee($foreman_id,'employee_fname');
+			$lname		= $options->attr_Employee($foreman_id,'employee_lname');
+			$foreman = $fname . " " . $lname;
 			
 			if($r['status'] == 'C'){
 				$status = 'Cancelled';
@@ -170,6 +176,7 @@ function printIframe(id)
             <td><?=$project_payroll_header_id_pad?></td>
             <td><?=date("F j, Y",strtotime($date))?></td>
           	<td><?=$project_name_code?></td>	
+          	<td><?=$foreman?></td>	
           	<td><?=number_format( $fetch_total['total'] ,2)?></td>	
           	<td><?=$status?></td>	
            <!--  <td><?=$work_category?></td>	

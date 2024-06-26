@@ -606,6 +606,7 @@ function printIframe(id)
             <?php if($status == "F"){ 
 					
 			?>       
+			<input type="button" name="b" id="b" value="Edit Details" onclick="xajax_update_supplier('<?=$po_header_id?>','<?=$supplier_id?>',  '<?=$view?>',  '<?=$remarks?>');"  />
 				<!-- <input type="submit" name="b" id="b" value="Unfinish" onclick="return confirm('Warning: Make sure the item was not received yet!');" /> -->
             <?php
 				}
@@ -1075,7 +1076,8 @@ function printIframe(id)
 				chargables,
 				person,
 				d.discount,
-				d.amount
+				d.amount,
+				pm.categ_id1
 			from
 				po_detail as d,
 				productmaster as pm
@@ -1114,12 +1116,15 @@ function printIframe(id)
                 $stock				= $r['stock'];
                 $quantity			= $r['quantity'];
                 $cost				= $r['cost'];
+                $category				= $r['categ_id1'];
                 
                 $amount				= $r['amount'];
             ?>
                 <tr>
                     <td><?=$i++?></td>
-                    <td><a href="admin.php?view=<?=$view?>&po_header_id=<?=$po_header_id?>&id=<?=$po_detail_id?>&b=M" ><img src="images/trash.gif" onclick="return approve_confirm();" /></a></td>
+                    <td>
+
+                    <a href="admin.php?view=<?=$view?>&po_header_id=<?=$po_header_id?>&id=<?=$po_detail_id?>&b=M" onclick="return approve_confirm();"  ><img src="images/trash.gif" />Del</a></td>
                     <td><?=$stock?></td>
                     <td><?=$details?></td>
                     <td><?=$r['chargables']?></td>
@@ -1129,7 +1134,7 @@ function printIframe(id)
                    
                     <td class="align-right"><?=number_format($r['discount']*$quantity,4,'.',',')?></td>
                     <td class="align-right"><?=number_format($amount,4,'.',',')?></td>
-                    <td class="align-right"><input type="button" value="Edit" onclick="xajax_admin_override('<?=$po_detail_id?>', '<?=$po_header_id?>', '<?=$stock?>', '<?=$stock_id?>', '<?=$quantity?>', '<?=$cost?>', '<?=$view?>', xajax.getFormValues('header_form'));"  /></td>
+                    <td class="align-right"><input type="button" value="Edit" onclick="xajax_admin_override('<?=$po_detail_id?>', '<?=$po_header_id?>', '<?=str_replace('"', '', $stock)?>', '<?=$stock_id?>', '<?=$quantity?>', '<?=$cost?>', '<?=$view?>', xajax.getFormValues('header_form'), '<?=$details?>', '<?=$category?>');"  /></td>
                     <input type='hidden' name='po_detail_id[]' value='<?=$po_detail_id?>' />
                 </tr>
             <?php
@@ -1336,6 +1341,7 @@ function printIframe(id)
         ?>
             <tr>
                 <td><?=$i++?></td>
+
                 <td><a href="admin.php?view=<?=$view?>&po_header_id=<?=$po_header_id?>&id=<?=$po_detail_id?>&b=M" ><img src="images/trash.gif" onclick="return approve_confirm();" /></a></td>
                 <td><?=$stock?></td>
                 <td><?=$details?></td>

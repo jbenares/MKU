@@ -432,6 +432,7 @@ function printIframe(id)
     
 		<?php
         if($status=="S"){
+
         ?>
             <div id="accordion">
                 <?php

@@ -9,6 +9,7 @@ require_once(dirname(__FILE__).'/library/lib.php');
 $from 	      = $_REQUEST['from'];
 $to   		  = $_REQUEST['to'];
 $project_id   = $_REQUEST['project_id'];
+$wht   = $_REQUEST['tax'];
 
 $sqlp = mysql_query("Select * from projects as p where
 p.project_id = '$project_id'") or die (mysql_error());
@@ -178,16 +179,19 @@ a:visited{
 <div class="container">
 <!-- Revenue/Sales -->
 <?php 
-$rev = mysql_query("select
-					sum(h.amount) as amount
-					from
-					cr_header as h
-					where
-					h.project_id = '$project_id'") or die (mysql_error());
+// $rev = mysql_query("select
+// 					sum(h.amount) as amount
+// 					from
+// 					cr_header as h
+// 					where
+// 					h.project_id = '$project_id'") or die (mysql_error());
+
+$rev =  mysql_query("select sum(contract_revenue) as amount FROM project_payroll_header where project_id = '$project_id'") or die (mysql_error());
+
 
 $rsrev = mysql_fetch_assoc($rev);	
 
-$tax = $rsrev['amount'] * (7/100);	
+$tax = $rsrev['amount'] * ($wht/100);	
 
 $net = $rsrev['amount'] - $tax; 
 ?>
@@ -206,7 +210,7 @@ Address : <?=$rp['address']?></div>
 		<td width="170" style="font-weight: bold; text-align: right;"><?=number_format($rsrev['amount'],2)?></td>
 	</tr>
 	<tr>
-		<td width="300" id="totalities" style="padding-left: 20px;">Less: Witholding Tax 7%</td>
+		<td width="300" id="totalities" style="padding-left: 20px;">Less: Witholding Tax <?php echo $wht; ?>%</td>
 		<td width="170" style="font-weight: bold; text-align: right;"></td>
 		<td width="170" style="font-weight: bold; text-align: right;"></td>
 		<td width="170" style="font-weight: bold; text-align: right;"><?=number_format($tax,2)?></td>
@@ -489,8 +493,8 @@ Address : <?=$rp['address']?></div>
 	$total_sop += $rse['amount'];
 	?>
 	<tr>
-		<td><?=$rse['gchart']?></td>
-		<td><?=number_format($rse['amount'],2)?></td>
+		<td style='padding-left: 100px;'><?=$rse['gchart']?></td>
+		<td style="text-align: right;"><?=number_format($rse['amount'],2)?></td>
 	</tr>
 	<?php } ?>
 	<tr>

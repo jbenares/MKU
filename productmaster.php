@@ -149,7 +149,7 @@
 			while($r=mysql_fetch_assoc($rs)) {
 				$category = $options->attr_Category($r[categ_id1],'category');
 				
-				if($r['reorderlevel'] >= $options->inventory_warehouse(date("Y-m-d"),$r['stock_id'])){
+				if($r['reorderlevel'] >= $options->inventory_warehouse(date("Y-m-d"),$r['stock_id'], NULL, NULL)){
 					$alert = "class = 'alert'";
 				}
 				
@@ -166,7 +166,7 @@
 				echo '<td align="left">'.$r['unit'].'</td>';	
 				echo '<td><div align="right">P '.number_format($r['cost'],2,'.','').'</div></td>';	
 				echo '<td>'.$options->getStatusName($r['status']).'</td>';	
-				echo '<td>'.$options->inventory_warehouse(date("Y-m-d"),$r['stock_id']).' '.$r['unit'].'</td>';	
+				echo '<td>'.$options->inventory_warehouse(date("Y-m-d"),$r['stock_id'], NULL, NULL).' '.$r['unit'].'</td>';	
 				echo '<td '.$alert.'>'.$r['reorderlevel'].'</td>';	
 				echo '</tr>';
 			}

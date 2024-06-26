@@ -2856,6 +2856,38 @@
 			return $content;
 		}
 
+
+		// function getForeman($selectedid=NULL,$name='foremanID'){
+		// 	$content="
+		// 		<select name='$name' id='foremanID'>
+		// 			<option value=''>Select Foreman:</option>
+		// 	";
+
+		// 	$query="
+		// 		select
+		// 			*
+		// 		from
+		// 			employee
+		// 		where
+		// 			work_category_id='8'
+		// 	";
+		// 	$result=mysql_query($query);
+		// 	while($r=mysql_fetch_assoc($result)):
+		// 		$selected=($selectedid==$r[employeeID])?"selected='selected'":"";
+
+		// 		$content.="
+		// 			<option value='$r[employeeID]' $selected >$r[employee_fname] . " " . $r[employee_lname] </option>
+		// 		";
+		// 	endwhile;
+
+		// 	$content.="
+		// 		</select>
+		// 	";
+
+		// 	return $content;
+		// }
+
+
 		function getJournalName($selectedid){
 			$query="
 				select
@@ -6017,6 +6049,40 @@
 			return $r[$column];
 		}
 
+		function getProjectPayrollAmount($date_from,$date_to, $project_id,$foreman_id){
+		$query="
+			select
+				*
+			from 
+				project_payroll_header
+				where status != 'C'";
+
+			if($date_from && $date_to){
+				$query .= " AND date BETWEEN '$date_from' AND '$date_to'";
+			}
+
+			if($project_id){
+				$query .= " AND project_id = '$project_id'";
+			}
+			if($foreman_id){
+				$query .= " AND foreman_id = '$foreman_id'";
+			}
+
+			$query .= " order by date asc";
+		   $result=mysql_query($query);
+		   while($head = mysql_fetch_array($result)) {
+
+		   		$queryd = mysql_query("select SUM(total_price) AS total from project_payroll_detail where project_payroll_header_id = '$head[project_payroll_header_id]'");
+		   		$fetch_d = mysql_fetch_assoc($queryd);
+		   		$querydd = mysql_query("select SUM(discount_amount) AS total_discount from project_payroll_discount where project_payroll_header_id = '$head[project_payroll_header_id]'");
+		   		$fetch_dd = mysql_fetch_assoc($querydd);
+
+		   		$total[] = $fetch_d['total'] - $fetch_dd['total_discount'];
+		   }
+
+		   return array_sum($total);
+		}
+
 		function attr_AccountType($account_id,$column){
 			$result=mysql_query("
 				select
@@ -6038,6 +6104,19 @@
 					projects
 				where
 					project_id = '$id'
+			") or die(mysql_error());
+			$r=mysql_fetch_assoc($result);
+			return $r[$column];
+		}
+
+		function attr_Employee($id,$column){
+			$result=mysql_query("
+				select
+					*
+				from
+					employee
+				where
+					employeeID = '$id'
 			") or die(mysql_error());
 			$r=mysql_fetch_assoc($result);
 			return $r[$column];

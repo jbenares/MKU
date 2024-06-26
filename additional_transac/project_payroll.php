@@ -24,7 +24,13 @@ $aStatus = array(
     'C' => 'Cancelled'
 );
 
-
+$query_foreman= mysql_query("select
+                 *
+             from
+                 employee
+             where
+                 employee_type_id='8'");
+         
 function insertTransactionToDB($form_data){
 
     if(empty($form_data['project_payroll_header_id'])){
@@ -37,7 +43,9 @@ function insertTransactionToDB($form_data){
     $sql .= "
         set
             date       = '$form_data[date]',            
-            project_id = '$form_data[project_id]',                
+            project_id = '$form_data[project_id]', 
+            foreman_id = '$form_data[foreman_id]',  
+            contract_revenue = '$form_data[contract_revenue]',              
             remarks    = '".addslashes($form_data['remarks'])."',               
     ";
 
@@ -178,6 +186,17 @@ function displayDetails($id){
             $i++;
         }
     }
+   
+    $retention = $t_price * 0.1;
+    echo "  <tr>
+            <td></td>
+            <td></td>
+            <td  style='text-align:right;'>10% Retention</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td style='text-align:right;'>(".number_format($retention,2).")</td>
+        </tr>";
     $discount_total =0;
     if( count($arr_disc) ){
        
@@ -203,9 +222,10 @@ function displayDetails($id){
         }
     }
 
-        $total_amount = $t_price -$discount_total;
+    $total_amount= $t_price -$retention - $discount_total;
 
-    echo "            
+    echo "        
+          
             </tbody>
             <tfoot>
                 <tr>
@@ -307,7 +327,7 @@ if( $_REQUEST['b'] == "Submit" ){
     computeExcessQuantity($_REQUEST['project_payroll_header']);
 } else if( $_REQUEST['b'] == "Add Expense" ){
     addExpense();
-}else if( $_REQUEST['b'] == "Add Discount" ){
+}else if( $_REQUEST['b'] == "Add Deduction" ){
     addDiscount();
 }else if($_REQUEST['b'] == "rd" ){
     $sql = "
@@ -463,6 +483,28 @@ if($_REQUEST['project_payroll_header_id'] && $_REQUEST['b'] != "Search"){
                         <input type="hidden" name="project_id" value="<?=$aVal['project_id']?>" >
                     </div>
 
+                      <div class="inline">
+                        Foreman <br>
+
+                      
+                          <select name='foreman_id'>
+                            <option></option>
+                            <?php while($fetch_foreman = mysql_fetch_array($query_foreman)){ 
+                                $selected=($aVal['foreman_id']==$fetch_foreman[employeeID])?"selected='selected'":"";
+                                ?>
+                            <option value="<?php echo $fetch_foreman['employeeID']; ?>" <?php echo $selected; ?>><?php echo $fetch_foreman['employee_fname'] . " " . $fetch_foreman['employee_lname']; ?></option>
+                            <?php } ?>
+                         </select> 
+                    </div>
+
+                      <div class="inline">
+                        Contract Revenue <br>
+
+                      
+                           <input type="text" class="textbox" name="contract_revenue" id="contract_revenue" value="<?=$aVal['contract_revenue']?>"> 
+                    </div>
+
+
                     
                 </p>           
                 <p>
@@ -507,19 +549,19 @@ if($_REQUEST['project_payroll_header_id'] && $_REQUEST['b'] != "Search"){
             </fieldset>
 
              <fieldset style="border:none; border:1px solid #c0c0c0; display:inline-block;">
-                <legend>DISCOUNT ENTRY</legend>
+                <legend>DEDUCTION ENTRY</legend>
                                     
                     <div style="display:inline-block;">
-                        Discount Name : <br>
+                        Deduction Name : <br>
                         <input type="text" class="textbox " name="discount_name" id="discount_name">                    
                     </div>
                     <div style="display:inline-block;">
-                        Discount Amount : <br>
+                    Deduction Amount : <br>
                         <input type="text" class="textbox3 price" name="discount_amount" id="discount_amount"  onkeypress="if(event.keyCode==13){ jQuery('#discount_btn').click(); return false; }">
                     </div>
 
                
-                    <input type="submit" value="Add Discount" name="b" id="discount_btn">
+                    <input type="submit" value="Add Deduction" name="b" id="discount_btn">
                         
             </fieldset>
             <?php endif; ?>
@@ -530,9 +572,9 @@ if($_REQUEST['project_payroll_header_id'] && $_REQUEST['b'] != "Search"){
                 <?php } ?>
 
                 <?php if($_REQUEST['b'] != "Print Preview" && !empty($aVal['status'])){ ?>
-                 <!-- <input type="submit" name="b" id="b" value="Print Preview" />  -->
+                 <input type="submit" name="b" id="b" value="Print Preview" /> 
                 <?php } else if($_REQUEST['b'] == "Print Preview"){ ?>    
-                <!-- <input type="button" value="Print" onclick="printIframe('JOframe');" />  -->
+                <input type="button" value="Print" onclick="printIframe('JOframe');" /> 
                 <?php } ?>
 
                 <?php if( in_array($aVal['status'], array("S"))){ ?>            
@@ -548,13 +590,13 @@ if($_REQUEST['project_payroll_header_id'] && $_REQUEST['b'] != "Search"){
         require_once(dirname(__FILE__).'/transaction-status.php');
         } ?>
         
-        <?php if( $aVal['project_payroll_header_id'] ): ?>
+        <?php if( $aVal['project_payroll_header_id'] && $_REQUEST['b'] != "Print Preview"): ?>
         <div>
             <?=displayDetails($aVal['project_payroll_header_id']);?>    
         </div>
         <?php endif; ?>
         <?php if($_REQUEST['b'] == "Print Preview" && $aVal['project_payroll_header_id']){ 
-            echo " <iframe id='JOframe' name='JOframe' frameborder='0' src='print_sales_return.php?id=$aVal[project_payroll_header_id]' width='100%' height='500'>
+            echo " <iframe id='JOframe' name='JOframe' frameborder='0' src='print_project_payroll.php?id=$aVal[project_payroll_header_id]' width='100%' height='500'>
             </iframe>";    
         } 
         ?>

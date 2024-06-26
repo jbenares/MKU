@@ -142,7 +142,9 @@ html[xmlns] .clearfix {
 					$query .= " and stock_id = '$stock_id'";
 					}
 					if($from_date && $to_date){
-					$query .=  " and date between '$from_date' and '$to_date'";
+						$query .=  " and date between '$from_date' and '$to_date'";
+					} else {
+						$query .=  " and date >= '2024-06-01'";
 					}
 					if($project_id){
 					$query .=  " and project_id = '$project_id'";
@@ -198,6 +200,8 @@ html[xmlns] .clearfix {
 					}
 					if($from_date && $to_date){
 					$query .=  " and date between '$from_date' and '$to_date'";
+					} else {
+						$query .=  " and date >= '2024-06-01'";
 					}
 					if($stock_id){
 					$query .=  " and (
@@ -273,6 +277,8 @@ html[xmlns] .clearfix {
 					}
 					if($from_date && $to_date){
 					$query .=  " and date between '$from_date' and '$to_date'";
+					} else {
+						$query .=  " and date >= '2024-06-01'";
 					}
 					if($project_id){
 					$query .=  " and project_id = '$project_id'";
@@ -323,6 +329,8 @@ html[xmlns] .clearfix {
 					}
 					if($from_date && $to_date){
 						$query .=  " and date between '$from_date' and '$to_date'";
+					} else {
+						$query .=  " and date >= '2024-06-01'";
 					}
 					if($project_id){
 						$query .=  " and project_id = '$project_id'";
@@ -372,6 +380,8 @@ html[xmlns] .clearfix {
 					}
 					if($from_date && $to_date){
 						$query .=  " and date between '$from_date' and '$to_date'";
+					} else {
+						$query .=  " and date >= '2024-06-01'";
 					}
 					if($project_id){
 						$query .=  " and project_id = '$project_id'";
@@ -425,6 +435,8 @@ html[xmlns] .clearfix {
 					}
 					if($from_date && $to_date){
 						$query .=  " and date between '$from_date' and '$to_date'";
+					} else {
+						$query .=  " and date >= '2024-06-01'";
 					}
 					if($project_id){
 						$query .=  " and to_project_id = '$project_id'";
@@ -476,6 +488,8 @@ html[xmlns] .clearfix {
 					}
 					if($from_date && $to_date){
 						$query .=  " and date between '$from_date' and '$to_date'";
+					} else {
+						$query .=  " and date >= '2024-06-01'";
 					}
 					if($project_id){
 						$query .=  " and from_project_id = '$project_id'";
@@ -529,6 +543,8 @@ html[xmlns] .clearfix {
 					}
 					if($from_date && $to_date){
 						$query .=  " and date between '$from_date' and '$to_date'";
+					} else {
+						$query .=  " and date >= '2024-06-01'";
 					}
 					if($project_id){
 						$query .=  " and from_project_id = '$project_id'";
@@ -582,6 +598,8 @@ html[xmlns] .clearfix {
 					}
 					if($from_date && $to_date){
 						$query .=  " and date between '$from_date' and '$to_date'";
+					} else {
+						$query .=  " and date >= '2024-06-01'";
 					}
 					if($project_id){
 						$query .=  " and project_id = '$project_id'";
